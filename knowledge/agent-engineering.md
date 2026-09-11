@@ -2,9 +2,11 @@
 title: AI Agent Engineering 통합 지식베이스
 source: Google Drive / KDT AI HUMAN 강의·실습 자료
 source_root: https://drive.google.com/drive/folders/1dgs2PekmLTTZVVEzawHbetbiXHLvFJ9n
+source_updates:
+  - https://drive.google.com/drive/folders/1c67ZK6syUiM5qykdYTpzYBWuTpjTK6xL
 generated: 2026-09-11
 language: ko
-scope: LLM 제어·출력계약, Agent 런타임, Tool 설계, MCP, n8n, FastAPI, SQLite, Observability, Docker, GCP, RAG 실습 자료
+scope: LLM 제어·출력계약, Agent 런타임, Tool 설계, MCP, n8n, FastAPI, SQLite, Langfuse Observability·Prompt Management·Evaluation, Docker, GCP, RAG 실습 자료
 ---
 
 # AI Agent Engineering 통합 지식베이스
@@ -1241,60 +1243,405 @@ UPDATE todos SET done = 1 WHERE title = '장보기';
 
 ---
 
-# 16. Observability: 로그에서 운영으로
+# 16. Langfuse Observability · Prompt Management · Evaluation
 
-## 16.1 Print 로그의 한계
+기존 로그는 "무슨 일이 있었나"를 남기는 데 강하지만, LLM 서비스는 같은 입력에도 출력이 달라질 수 있고, 호출마다 토큰 비용이 발생하며, HTTP 200이어도 답의 품질은 틀릴 수 있다. 그래서 Agent 운영에서는 단순 요청 로그보다 **실행 구조와 맥락을 되짚을 수 있는 관측**이 필요하다.
 
-한 번의 실험은 `print()`로 볼 수 있지만, 여러 run을 비교하기 시작하면 다음이 필요해진다.
-
-- trace
-- span
-- generation
-- latency
-- token/cost
-- error taxonomy
-- score
-- run/version metadata
-- 검색과 필터
-
-자료의 흐름은 다음과 같다.
+Langfuse 자료는 이를 세 축으로 정리한다.
 
 ```text
-Model Run
-  ↓
-SQLite Ledger
-  ↓
-Langfuse 같은 Observability Tool
+① Observability      무슨 일이 있었나 / 왜 느렸나 / 어떤 Tool을 썼나
+② Prompt Management 무엇을 바꿀 것인가 / 어떤 버전이 서비스 중인가
+③ Evaluation        그 결과가 좋았나 / 변경 후 나빠지지 않았나
 ```
 
-## 16.2 원본 DB와 관측 도구를 함께 쓰는 이유
+관측만 하고 score를 남기지 않으면 "무슨 일이 있었는지"는 보이지만 "좋았는지"는 알 수 없다. 반대로 평가만 하고 trace가 없으면 품질 저하의 원인을 되짚기 어렵다.
 
-자료의 결론은 둘 중 하나를 고르는 것이 아니다.
+## 16.1 Trace · Span · Generation · Agent · Tool
+
+핵심 어휘는 다음과 같다.
 
 ```text
-Own DB
-  장점: 데이터 소유, 자유로운 SQL, 보관 정책 제어
-
-Observability Tool
-  장점: trace 구조, UI, 점수, 비교, 알림
+trace       = 사용자 요청 한 건 전체
+span        = 요청 안의 작업 한 덩어리
+ generation = LLM 호출
+agent       = Agent 판단/실행 구간
+ tool       = 개별 Tool 호출 구간
 ```
 
-실무형 구조:
+`span`과 `generation`을 구분하는 이유는 집계 때문이다. 모델·토큰·비용 같은 LLM 전용 메타데이터는 `generation` 단위로 모아야 모델별 지연, 토큰 사용량, 비용을 정확히 비교할 수 있다.
+
+Agent 예시는 다음처럼 볼 수 있다.
 
 ```text
-Source of Truth     = Own DB / Event Store
-Operational View    = Observability Platform
+Trace: 사용자 요청
+ └─ Agent: 계획
+    ├─ Tool: list_capabilities
+    ├─ Generation: 다음 행동 선택
+    ├─ Tool: invoke_capability
+    └─ Span: 결과 검증
 ```
 
-## 16.3 “보냈다”와 “저장됐다”를 구분
+Factory Agent Hub에서는 최소한 `trace_id/run_id`, 장비·Capability, 검증된 인자, 승인 상태, 실행 결과, 오류, latency를 같은 요청 흐름에서 연결할 수 있어야 한다.
 
-비동기 관측 SDK에서는 `flush()` 호출만으로 서버에 반영됐다고 단정하면 안 된다. 전송 후 다시 읽어서 확인하는 read-back 검증이 중요하다.
+## 16.2 요청 축과 사람/세션 축
+
+Trace만으로는 "이 요청이 왜 느렸나"는 답할 수 있어도 "누가 비용을 많이 썼나", "이 사용자가 오늘 몇 번 실패했나"는 답하기 어렵다.
+
+필요하면 다음 메타데이터를 명시적으로 전달한다.
 
 ```text
-Emit → Flush → Read Back → Confirm
+user_id
+session_id
 ```
 
-이 사고는 메시지 큐, 로그 파이프라인, 외부 API 적재에도 그대로 적용된다.
+`session_id`는 관측상 여러 trace를 묶기 위한 값이지, 자동으로 LLM에게 이전 대화를 전달하는 Memory 기능은 아니다. 이 둘을 혼동하지 않는다.
+
+또한 이런 메타데이터는 나중에 소급 생성되지 않는다. 운영 중 묻고 싶은 질문을 먼저 정하고, 그 질문에 필요한 필드를 실행 시점에 남겨야 한다.
+
+## 16.3 Own DB와 Langfuse의 역할 분리
+
+관측 데이터는 보통 서비스의 정본(Source of Truth)이 아니다.
+
+```text
+Own DB / Event Store
+  서비스 상태, 승인, 실제 장비 결과, 법적/업무상 필요한 기록
+
+Langfuse
+  trace 구조, prompt/model/tool 맥락, latency, token/cost, score, 비교·분석
+```
+
+따라서 실무형 구조는 다음과 같다.
+
+```text
+Source of Truth  = Own DB / Event Store
+Operational View = Langfuse / Observability Platform
+```
+
+Langfuse에 기록됐다는 이유만으로 업무 상태를 확정하지 않고, 반대로 DB에 결과만 남기고 trace를 버리면 "왜 그렇게 됐는가"를 조사하기 어렵다.
+
+## 16.4 Self-hosted 아키텍처와 비동기 저장
+
+강의의 로컬 구성은 여섯 컴포넌트로 설명한다.
+
+```text
+langfuse-web     UI + SDK 데이터 수신
+langfuse-worker  백그라운드 처리
+redis            web → worker 큐
+postgres         계정·프로젝트·설정
+clickhouse       trace / observation 대량 저장·집계
+minio            긴 prompt/response 등 대용량 payload
+```
+
+여기서 중요한 운영 함의는 다음이다.
+
+> **보냈다(emit/flush)와 조회 가능하게 저장됐다(ingested)는 다르다.**
+
+```text
+Application
+   ↓ emit / flush
+langfuse-web
+   ↓
+Redis Queue
+   ↓
+Worker
+   ↓
+ClickHouse / Storage
+```
+
+짧게 끝나는 스크립트나 서버리스 실행에서는 버퍼 유실을 막기 위해 `flush()`가 중요하지만, `flush()`는 저장 완료까지 보장하지 않는다. 조회나 CI 판정에서는 polling/retry 또는 read-back 확인이 필요하다.
+
+강의 실측에서도 observation과 score가 UI/API에서 보이기까지 수초 차이가 발생했다. 따라서 "flush 직후 score가 0건"을 즉시 실패로 판정하는 코드는 잘못된 결론을 낼 수 있다.
+
+## 16.5 기본 연결과 관측 패턴
+
+로컬과 Cloud의 차이를 코드에 하드코딩하기보다 환경변수로 분리한다.
+
+```text
+LANGFUSE_HOST
+LANGFUSE_PUBLIC_KEY
+LANGFUSE_SECRET_KEY
+```
+
+SDK 코드는 환경변수를 읽어 초기화하도록 두고, startup/health 단계에서 인증 상태를 확인하는 진단 경로를 갖는 것이 좋다.
+
+개념적 사용 패턴:
+
+```python
+from langfuse import get_client
+
+lf = get_client()
+
+with lf.start_as_current_observation(
+    name="device-onboarding",
+    as_type="span",
+    input={"device_id": "robot_arm_01"},
+) as obs:
+    # business logic
+    obs.update(output={"status": "validated"})
+
+lf.flush()
+```
+
+실제 SDK 세부 문법은 버전에 따라 바뀔 수 있으므로 구현 시 최신 공식 문서를 확인한다. 여기서 중요한 것은 API 이름보다 **업무 구간을 관측 단위로 감싸고, 입력·출력·상태를 구조적으로 남기는 패턴**이다.
+
+## 16.6 조용한 실패를 별도로 감시한다
+
+관측 SDK는 서비스 본체를 죽이지 않기 위해 인증/전송 실패를 치명적 예외로 만들지 않을 수 있다. 그 결과 다음과 같은 상태가 가능하다.
+
+```text
+서비스 응답 정상
+LLM 호출 정상
+Langfuse trace 없음
+애플리케이션 오류 로그도 없음
+```
+
+따라서 관측 자체의 건강 상태를 별도로 확인해야 한다.
+
+```text
+startup auth_check
+관측용 환경변수 존재 확인
+진단 endpoint / health check
+샘플 trace emit 후 read-back
+관측 누락률 모니터링
+```
+
+"서비스가 정상"과 "관측이 정상"을 같은 상태로 간주하지 않는다.
+
+## 16.7 비용은 토큰 × 단가 매핑의 결과다
+
+관측 도구의 비용 표시는 단순히 API가 돌려준 숫자가 아닐 수 있다.
+
+```text
+input/output token count
+        ×
+model price mapping
+        =
+estimated cost
+```
+
+모델 이름이 플랫폼의 가격표와 매칭되지 않으면 유료 호출인데도 비용이 0으로 보일 수 있다. 따라서 `$0`을 곧바로 무료라고 해석하지 않는다.
+
+또한 모델 단가만으로 비용을 비교하면 틀릴 수 있다. 프롬프트가 출력을 길게 만들면 싼 모델도 총비용과 latency가 커질 수 있다. 비교 기준은 다음과 같이 실제 관측값으로 잡는다.
+
+```text
+model price
++ input tokens
++ output tokens
++ latency
++ retries
++ task success
+= cost per successful task
+```
+
+## 16.8 Timeline은 집계 숫자가 못 보여주는 것을 보여준다
+
+동시 요청의 개별 latency만 보면 정상처럼 보여도, timeline에서는 동기 호출 때문에 작업이 직렬로 줄 서는 병목이 보일 수 있다.
+
+예:
+
+```text
+Request A  [======]
+Request B         [========]
+Request C                  [=====]
+```
+
+async 함수 안에서 동기 클라이언트를 호출하는 것처럼 **코드의 블로킹 구조**는 평균/합계 숫자보다 trace timeline에서 더 쉽게 드러날 수 있다.
+
+따라서 latency 분석은 다음 둘을 함께 본다.
+
+```text
+Aggregate Metrics
++ Trace Timeline
+```
+
+## 16.9 Prompt Management: version과 label
+
+프롬프트를 운영 파라미터로 관리할 때 핵심 개념은 두 가지다.
+
+```text
+version = 고정된 스냅샷
+label   = 특정 version을 가리키는 이동 가능한 포인터
+```
+
+예:
+
+```text
+v1   v2   v3
+     ↑
+production
+```
+
+`production` label을 이전 version으로 옮기면 코드 재배포 없이 롤백할 수 있다. 다만 cache TTL이 길수록 조회 latency는 줄지만 변경 반영이 늦어질 수 있으므로 운영 요구에 맞게 결정한다.
+
+더 중요한 것은 **프롬프트를 가져다 쓰는 것만으로는 추적성이 완성되지 않는다는 점**이다. trace와 prompt version을 연결하지 않으면 나중에 다음 질문에 답하기 어렵다.
+
+> "품질이 떨어진 이 응답은 어느 prompt version에서 나왔는가?"
+
+따라서 실행 메타데이터에는 prompt name/version/label 또는 이에 준하는 식별자를 남긴다.
+
+프롬프트를 플랫폼에서 운영자가 바꿀 수 있게 만들면 배포 없이 수정할 수 있다는 장점과 함께 권한·리뷰·승인 절차가 필요하다. **편의성이 커질수록 변경 통제도 함께 설계**한다.
+
+## 16.10 Evaluation: score는 별도 데이터다
+
+Trace는 실행 사실과 구조를 보여주지만 품질을 자동으로 알지 못한다. 품질을 운영하려면 `score`를 별도로 정의하고 남겨야 한다.
+
+평가기는 크게 두 종류로 나눈다.
+
+### 규칙 기반 evaluator
+
+결정적으로 판정할 수 있는 것에 사용한다.
+
+```text
+예: 기대한 Tool을 실제로 호출했는가?
+예: DeviceSpec이 schema를 통과했는가?
+예: 위험 command가 승인 없이 전송되지 않았는가?
+```
+
+장점:
+
+- 빠름
+- 결정적
+- 추가 LLM 비용 없음
+
+### LLM-as-judge
+
+의미 판단이 필요한 경우에만 사용한다.
+
+```text
+예: 답변이 장비 매뉴얼의 근거와 일치하는가?
+예: 설명이 모호하지 않고 담당자에게 충분한가?
+```
+
+단점:
+
+- judge 자체도 비결정적
+- 추가 latency/cost 발생
+- judge 실행도 다시 관측·검증 대상
+
+원칙은 다음과 같다.
+
+> **결정적인 것은 규칙으로, 판단이 필요한 것만 LLM에게 맡긴다.**
+
+## 16.11 과정 지표와 결과 지표를 분리한다
+
+하나의 score만 보면 잘못된 결론을 낼 수 있다.
+
+예를 들어:
+
+```text
+과정 지표: expected_tool_used
+결과 지표: answer_grounded / task_success
+```
+
+도구는 올바르게 골랐지만 최종 답이 근거를 설명하지 못할 수 있고, 반대로 답은 그럴듯하지만 필요한 도구를 건너뛰었을 수 있다.
+
+Agent 평가에서는 최소한 다음을 분리해 보는 것이 좋다.
+
+```text
+Process Quality
+- tool selection
+- validation pass
+- approval respected
+- retry policy respected
+
+Outcome Quality
+- task success
+- factual/semantic correctness
+- user/business usefulness
+```
+
+Factory Agent Hub라면 특히 다음 조합이 유용하다.
+
+```text
+expected_capability_selected
+command_schema_valid
+approval_gate_respected
+actual_device_state_matches
+onboarding_task_success
+```
+
+## 16.12 Dataset · Experiment · Regression
+
+평가셋의 가장 큰 가치는 한 번 점수를 내는 데 있지 않고 **같은 조건을 다시 재서 비교하는 데** 있다.
+
+```text
+Baseline
+   ↓
+Prompt / Model / Code 변경
+   ↓
+Same Dataset
+   ↓
+Experiment
+   ↓
+Diff / Regression 확인
+```
+
+모델, 프롬프트, Tool description, MCP surface를 바꿀 때는 동일한 데이터셋과 evaluator를 다시 돌려야 변화의 원인을 비교할 수 있다.
+
+이 원칙은 앞의 Release Gate와 직접 연결된다.
+
+```text
+Experiment Result
+→ quality metric
+→ latency/cost guardrail
+→ GO / HOLD
+```
+
+MCP 도구 수를 줄이거나 Tool description을 바꾸는 실험도 "느낌상 더 잘 고르는 것 같다"가 아니라 Dataset/Experiment로 선택 정확도를 비교할 수 있다.
+
+## 16.13 Self-hosted vs Cloud
+
+자료는 두 배포 형태를 같은 기능의 다른 운영 트레이드오프로 본다.
+
+| 항목 | Self-hosted | Cloud |
+|---|---|---|
+| 데이터 위치 | 자체 인프라 | 제공사 인프라 |
+| 운영 부담 | 컨테이너/DB/업그레이드 직접 관리 | 낮음 |
+| 시작 속도 | Docker 준비 필요 | 빠름 |
+| 민감 데이터 | 내부 통제에 유리 | 외부 전송 정책 검토 필요 |
+
+관측 도구는 prompt와 response를 저장할 수 있으므로, 실서비스에서는 **개인정보·비밀값·장비 제어 payload의 수집 범위와 보존 정책**을 먼저 정한다.
+
+## 16.14 언제 Langfuse가 과한가
+
+모든 프로젝트에 별도 관측 플랫폼이 필요한 것은 아니다.
+
+다음 상황에서는 단순 로그/SQLite가 더 나을 수 있다.
+
+- 호출량이 매우 적고 단발성 실험이다.
+- 이미 충분히 좋은 로그/추적 체계가 있다.
+- 별도 컨테이너 운영 비용이 이득보다 크다.
+- 외부 Cloud로 prompt/response를 보낼 수 없다.
+
+반대로 다음 요구가 생기면 Langfuse류의 가치가 커진다.
+
+- 한 요청 안의 Agent/Tool/Generation 구조를 추적해야 한다.
+- 모델·프롬프트별 latency/cost를 비교해야 한다.
+- prompt version과 결과를 연결해야 한다.
+- dataset/experiment로 회귀를 측정해야 한다.
+- 사람/세션 단위 사용량·실패를 분석해야 한다.
+
+## 16.15 Observability는 브레이크가 아니다
+
+마지막으로 가장 중요한 경계:
+
+```text
+Observability = 계기판
+Policy/Gate   = 브레이크
+```
+
+비용 초과를 Langfuse가 보여줄 수는 있어도, 초과 전에 요청을 차단하는 것은 애플리케이션의 budget policy다. 위험 명령을 trace에 남길 수는 있어도, 실제 실행을 막는 것은 Validator/Permission/Approval Gate다.
+
+```text
+Observe → Diagnose → Decide
+
+그리고 실제 강제는
+
+Validation / Permission / Budget / Approval Code
+```
+
+관측 도구를 안전 제어로 착각하지 않는다.
 
 ---
 
@@ -1554,7 +1901,7 @@ Cloud SQL / External APIs
 | n8n | 시각적 오케스트레이션 |
 | FastAPI | HTTP 서비스 경계 |
 | SQLite | 로컬/배치 실행 원장 |
-| Langfuse류 | Trace·Score·운영 관측 |
+| Langfuse | Trace·Prompt version·Score·Dataset/Experiment·운영 관측 |
 | Docker | 재현 가능한 실행 환경·격리 |
 | GCP | 원격 운영 인프라 |
 
@@ -1594,8 +1941,12 @@ Agent 시스템을 디버깅할 때는 “LLM이 이상하다”로 끝내지 �
   ├─ missing run metadata
   ↓
 [Observability]
+  ├─ SDK auth/env missing
   ├─ event emitted but not ingested
   ├─ trace correlation missing
+  ├─ prompt version not linked
+  ├─ score not yet ingested
+  └─ cost mapping missing
 ```
 
 “어디서 실패했는지”가 분명해야 담당자와 처방도 분리할 수 있다.
@@ -1654,18 +2005,27 @@ Agent 시스템을 디버깅할 때는 “LLM이 이상하다”로 끝내지 �
 - [ ] tool description 명확
 - [ ] audit trail 존재
 
-## 21.6 Persistence / Observability
+## 21.6 Persistence / Observability / Evaluation
 
-- [ ] run_id
+- [ ] run_id / trace_id
 - [ ] model/version
 - [ ] prompt/contract version
+- [ ] prompt version 또는 label과 trace 연결
 - [ ] input/output reference
+- [ ] tool/capability call hierarchy
 - [ ] attempts
 - [ ] error taxonomy
 - [ ] latency
 - [ ] cost/token
-- [ ] human review status
-- [ ] trace read-back 확인
+- [ ] model price mapping 확인
+- [ ] user_id/session_id가 필요한 경우 실행 시점에 기록
+- [ ] human review / approval status
+- [ ] startup auth/observability health 확인
+- [ ] flush 후 필요 시 read-back/polling
+- [ ] 규칙 기반 score와 의미 기반 score 구분
+- [ ] 동일 Dataset/Experiment로 regression 확인
+- [ ] Own DB와 관측 플랫폼의 Source of Truth 경계 명확
+- [ ] prompt/response 개인정보·비밀값 보존 정책 확인
 
 ## 21.7 Deployment
 
@@ -1779,7 +2139,9 @@ FastAPI
 + n8n
 + RAG
 + SQLite
-+ Observability
++ Langfuse Observability
++ Prompt Management
++ Evaluation
         ↓
 [운영]
 Docker
@@ -1792,7 +2154,10 @@ Docker
 Structured Output   ↔ FastAPI/Pydantic schema
 Tool Contract       ↔ MCP Tool Schema
 Retry Policy        ↔ n8n Error Branch / Agent Loop
-SQLite Ledger       ↔ Observability Trace
+SQLite Ledger       ↔ Langfuse Trace
+Prompt Version      ↔ Trace / Regression
+Tool Selection      ↔ Rule-based Evaluator
+Semantic Quality    ↔ LLM-as-judge
 Docker Isolation    ↔ Agent Tool Safety
 RAG                 ↔ MCP Resource / Search Tool
 Human Review        ↔ High-risk Action Gate
@@ -1830,15 +2195,27 @@ Human Review        ↔ High-risk Action Gate
    Host ↔ Client ↔ Server, Tool / Resource / Prompt.
 
 9. Agent의 실행은 기록해야 개선할 수 있다.
-   SQLite/DB에 원본을 남기고 Observability에서 trace와 score를 본다.
+   Own DB에 정본을 남기고 Langfuse에서 trace, prompt version, score를 연결한다.
 
-10. Docker는 Agent의 실행 계약이다.
+10. 관측과 평가는 다르다.
+    Trace는 무슨 일이 있었는지, Score는 그게 좋았는지 답한다.
+
+11. Prompt는 운영 파라미터다.
+    version은 snapshot, label은 pointer이며 trace와 연결해야 회귀 원인을 찾을 수 있다.
+
+12. 평가는 한 축으로 끝내지 않는다.
+    과정 지표 + 결과 지표, 규칙 기반 + 필요한 경우 LLM-as-judge.
+
+13. Docker는 Agent의 실행 계약이다.
     Reproducibility + Isolation + Composability.
 
-11. 출시 여부는 느낌이 아니라 Release Gate로 결정한다.
+14. 출시 여부는 느낌이 아니라 Release Gate로 결정한다.
     성공률 + p95 latency + cost + first-try + human review.
 
-12. 고위험 행동은 Draft → Gate → Commit으로 나눈다.
+15. 고위험 행동은 Draft → Gate → Commit으로 나눈다.
+
+16. Observability는 계기판이지 브레이크가 아니다.
+    실제 제한은 Validator/Permission/Budget/Approval 코드가 강제한다.
 ```
 
 ---
@@ -1951,6 +2328,54 @@ Data/
 FastAPI deck for KDT.pdf
 ```
 
+## G. `Langfuse Observability / Evaluation`
+
+추가 자료 폴더:
+
+```text
+Docs/
+  Langfuse deck for AI agents.pdf
+
+Practice/
+  README.md
+  docker-compose.yml
+  docker-compose.override.yml
+  requirements.txt
+  setup-env.sh
+  setup-env.ps1
+  agent_observed.py
+  score_retry.py
+  load_test.py
+  bench_models.py
+  eval_dataset.py
+```
+
+핵심 범위:
+
+```text
+Observability
+  trace / span / generation / agent / tool
+  user_id / session_id
+  latency / token / cost
+  quiet failure / auth health
+  flush vs ingestion
+
+Prompt Management
+  version / label
+  cache TTL
+  prompt version ↔ trace 연결
+  운영 권한 / 리뷰
+
+Evaluation
+  score
+  rule-based evaluator
+  LLM-as-judge
+  process vs outcome metric
+  Dataset / Experiment / Regression
+```
+
+실습 배포 README는 준비 파트와 학습 파트를 분리한다. Docker/환경 설정 파일은 제공하지만 `first_span.py`, `nested.py`, `main.py`, prompt version 예제처럼 관측 구조 자체를 익혀야 하는 코드는 직접 작성하도록 구성되어 있다. 반대로 retry 측정, load test, Agent 관측, 모델 benchmark, dataset evaluation처럼 보일러플레이트가 긴 스크립트는 제공된다.
+
 ---
 
 # 26. 최종 설계 원칙
@@ -1976,7 +2401,7 @@ Retry / Escalation
     ↓
 Persistence
     ↓
-Observability
+Observability / Evaluation
     ↓
 Sandbox / Deployment
 ```
@@ -1987,5 +2412,5 @@ Sandbox / Deployment
 - 잘못된 출력을 판별할 수 있고,
 - 실패를 종류별로 처리하며,
 - 위험한 행동은 강제로 제한하고,
-- 실행 근거를 남기고,
-- 실제 지표로 개선 여부를 판단할 수 있는 시스템이다.
+- 실행 근거와 prompt/model/tool version을 남기고,
+- 실제 지표와 회귀 실험으로 개선 여부를 판단할 수 있는 시스템이다.
