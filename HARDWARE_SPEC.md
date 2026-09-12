@@ -1,17 +1,33 @@
 # Factory Agent Hub — Hardware Testbed Specification
 
-> 상태: **2026-09-11 기준 설계안 v1**  
-> 목적: 16만 원대 교육용 키트를 구매하지 않고, 보유 전자부품 + 3D 프린팅 기구부 + 최소 기계부품 구매로 실제 Conveyor / Robot Arm 테스트베드를 구성한다.
+> 상태: **2026-09-12 설계안 v2**  
+> 목적: 기구부를 직접 설계·제작하는 데 시간을 쓰기보다, 저가 기성 기구 키트 + 보유 전자부품을 결합해 실제 Conveyor / Robot Arm 테스트베드를 빠르게 확보한다.
 >
-> 이 문서는 현재 하드웨어 구현의 기준 문서다. `PROJECT_PROPOSAL.md`에 남아 있는 L-LINE 키트 후보 내용보다 **현재 테스트베드 구성에 대해서는 이 문서를 우선**한다. 제품 가설과 Build Gate 자체는 `PROJECT_PROPOSAL.md`를 따른다.
+> 이 문서는 현재 하드웨어 구현의 기준 문서다. `PROJECT_PROPOSAL.md`의 과거 L-LINE 후보보다 **현재 테스트베드 구성에 대해서는 이 문서를 우선**한다. 제품 가설과 Build Gate 자체는 `PROJECT_PROPOSAL.md`를 따른다.
 
 ---
 
-## 1. 현재 결론
+## 1. 현재 결정사항
 
-기성 L-LINE 컨베이어/로봇팔 키트 구매는 **보류**한다.
+### 1.1 테스트베드 전략
 
-현재 보유 부품이 충분하므로 다음 구조를 우선한다.
+기존의 `축 + 베어링 + 평벨트 + 3D 프린트 프레임` 방식으로 Conveyor를 직접 제작하고 Robot Arm을 직접 모델링하는 계획은 **보류**한다.
+
+현재 우선 전략은 다음과 같다.
+
+- Conveyor: **5천~7천 원대 교육용 소형 목재 Conveyor kit**를 기구부로 사용한다.
+  - belt / roller / frame / 기본 motor를 우선 그대로 활용한다.
+  - 기본 motor가 제어에 적합하지 않으면 보유 motor/driver로 교체한다.
+  - 정확한 SKU는 구매 직전 구성품·크기·motor 접근성을 확인하고 확정한다.
+- Robot Arm: **SciPia G56 4-DOF Arduino Robot Arm Starter Kit**를 우선 구매 후보로 사용한다.
+  - 6-DOF 고하중 arm보다 비용, 전원, calibration, 충돌 위험을 줄인다.
+  - 매우 가벼운 물체의 pick-and-place / sorting만 목표로 한다.
+- Edge Gateway: **Raspberry Pi 3B+ 1대**를 사용한다.
+- Device controller: **Arduino Uno 2대 이상**을 장비별로 분리한다.
+- 전자부품, sensor, local UI 부품, Raspberry Pi 전원/부속품은 **보유품 우선**으로 사용한다.
+- shaft, custom endless flat belt, M3 assortment 등은 **선구매하지 않는다**. 실제 kit 조립 후 부족분만 산다.
+
+### 1.2 시스템 구조
 
 ```text
 Laptop
@@ -28,195 +44,191 @@ Raspberry Pi 3B+
   ├─ SQLite / Audit Log
   │
   ├─ USB Serial → Arduino #1 → Conveyor
-  └─ USB Serial → Arduino #2 → Robot Arm / Sorter
+  └─ USB Serial → Arduino #2 → G56 Robot Arm
 ```
 
 원칙:
 
-- LLM은 Raspberry Pi나 Arduino를 직접 raw command로 제어하지 않는다.
-- Agent는 MCP의 generic capability interface를 사용한다.
-- Raspberry Pi가 검증된 DeviceSpec / Capability를 바탕으로 실행 계층을 제공한다.
-- Arduino는 실제 센서·모터의 로컬 제어와 정지 동작을 담당한다.
+- LLM은 Raspberry Pi나 Arduino에 임의 raw command를 직접 보내지 않는다.
+- Agent는 generic MCP capability interface를 사용한다.
+- Raspberry Pi가 DeviceSpec / Capability 검증과 deterministic execution을 담당한다.
+- Arduino는 실제 sensor / motor / servo 제어와 local stop을 담당한다.
 - Raspberry Pi에는 LLM을 올리지 않는다. Pi는 Edge Gateway 역할에 집중한다.
-- 실제 평가 전에 firmware / Serial protocol / Adapter / schema / Agent prompt를 동결한다.
+- 평가 전에 firmware / Serial protocol / Adapter / schema / Agent prompt를 동결한다.
 
 ---
 
 ## 2. 확인된 주요 보유 부품
 
-Google Drive의 `부품 목록`을 기준으로 현재 확인된 핵심 재고다.
+Google Drive `부품 목록`을 기준으로 현재 핵심 재고는 다음과 같다.
 
 | 분류 | 모델 / 품목 | 수량 | 우선 용도 |
 |---|---|---:|---|
-| MCU | Arduino Uno | 9 | 장비별 로컬 컨트롤러 |
-| MCU | Arduino Nano | 1 | 소형 보조 컨트롤러 |
+| MCU | Arduino Uno | 9 | 장비별 controller |
+| MCU | Arduino Nano | 1 | 보조 controller |
 | Edge | Raspberry Pi 3B | 1 | 예비 Gateway |
 | Edge | Raspberry Pi 3B+ | 2 | **주 Edge Gateway 후보** |
-| Edge | Raspberry Pi Zero W | 1 | Later / 보조 노드 |
-| Servo | SG90 | 12 | Robot Arm / Gripper / Diverter |
-| Servo | FS90 | 5 | Robot Arm / Gripper |
+| Edge | Raspberry Pi Zero W | 1 | Later / 보조 node |
+| Servo | SG90 | 12 | 예비 / 교체 / auxiliary actuator |
+| Servo | FS90 | 5 | 예비 / gripper |
 | Servo | EF92A | 1 | 예비 |
-| Servo | MG996R | 1 | Robot Arm 고하중 축 |
-| Stepper | 28BYJ-48 | 7 | Conveyor 구동 후보 |
+| Servo | MG996R | 1 | 예비 고토크 축 |
+| Stepper | 28BYJ-48 | 7 | Conveyor motor 대체 후보 |
 | Stepper driver | 모델 미확인 | 7 | 28BYJ-48 구동 |
-| DC motor | 소형 DC motor | 13 | Conveyor 대체 구동 / 보조 |
+| DC motor | 소형 DC motor | 13 | Conveyor motor 대체 후보 |
 | Motor | 기타 소형 motor | 20 | 예비 |
-| Bearing | 608ZZ | 9 | Conveyor roller / 회전 지지 |
-| Distance | HC-SR04 | 13 | 물체 감지 / 거리 |
-| Distance | SRF05 | 2 | 물체 감지 / 거리 |
-| Proximity | IR 근접센서 | 4 | Conveyor object detect |
-| RFID | RC522 | 10 | 물체/카드 식별 장비 |
-| Display | LCD | 11 | 로컬 상태 표시 |
-| Status | NeoPixel / LED 계열 | 다수 | READY/RUNNING/ERROR 표시 |
-| Input | Joystick | 7 | 수동 jog / calibration |
-| Input | Switch / button / potentiometer | 다수 | local stop / manual control |
-| Alert | Buzzer | 다수 | 오류/완료 알림 |
-| 기타 | MPU-6050, DHT 계열, PIR, microphone, RTC, relay 등 | 다수 | 예비 Device / sensor station |
+| Bearing | 608ZZ | 9 | 필요 시 기구 보강 / 예비 |
+| Distance | HC-SR04 | 13 | object detect / distance |
+| Distance | SRF05 | 2 | object detect / distance |
+| Proximity | IR 근접 sensor | 4 | Conveyor object detect |
+| RFID | RC522 | 10 | object/card identification |
+| Display | LCD | 11 | local status |
+| Status | NeoPixel / LED 계열 | 다수 | READY/RUNNING/ERROR |
+| Input | Joystick | 7 | manual jog / calibration |
+| Input | switch / button / potentiometer | 다수 | local stop / manual control |
+| Alert | buzzer | 다수 | fault / completion |
+| 기타 | MPU-6050, DHT, PIR, microphone, RTC, relay 등 | 다수 | 예비 Device / sensor station |
 
-추가로 LED, 저항, 포텐쇼미터, 부저, 스위치 등 기본 수동소자는 충분히 보유한 것으로 확인했다.
+LED, 저항, 포텐쇼미터, 부저, 스위치 등 기본 수동소자도 충분히 보유한 것으로 본다.
 
 ---
 
-## 3. Conveyor v1 기구 명세
+## 3. Conveyor v2
 
 ### 3.1 목표
 
-- 탁상형 소형 Conveyor
-- 작은 블록, RFID 카드 부착 물체, 가벼운 테스트 물체 운반
-- 복잡한 산업용 기구가 아니라 Agent onboarding / orchestration을 검증하기 위한 testbed
-- 부품 고장이나 벨트 슬립이 생겨도 쉽게 분해·재출력 가능하도록 모듈형으로 구성
+- 저가 교육용 Conveyor kit의 **기계 구조를 재사용**한다.
+- 작은 블록, RFID tag 부착 물체, 가벼운 테스트 물체만 운반한다.
+- Agent onboarding / orchestration 검증이 목적이며 산업용 하중·속도 성능은 목표가 아니다.
+- kit 자체 전자제어가 있다면 그대로 신뢰하지 않고, Arduino를 통해 우리가 정의한 protocol로 제어한다.
 
-### 3.2 기준 치수
-
-| 항목 | v1 권장값 |
-|---|---:|
-| Belt width | **60 mm** |
-| Belt endless circumference | **약 800 mm** |
-| Belt thickness | **약 0.8~1.5 mm 권장** |
-| Belt material | PU 또는 PVC 계열 평벨트 |
-| Roller diameter | **Ø32 mm 전후** |
-| Roller usable width | **70 mm** |
-| Roller center distance | **약 350 mm nominal** |
-| Overall length | **약 420~450 mm** |
-| Overall width | **약 100~110 mm** |
-| Shaft | **Ø8 mm × 150 mm × 2** |
-| Bearing | **608ZZ × 4** |
-| Tension adjustment | **총 15~20 mm 정도** |
-| Frame printed wall/thickness | 약 4~5 mm부터 시작 |
-
-벨트 길이와 롤러 중심거리는 아래를 초기값으로 사용한다.
+### 3.2 유지 / 교체 판단
 
 ```text
-Belt length ≈ 2 × center_distance + π × roller_diameter
-
-800 ≈ 2C + π × 32
-C ≈ 350 mm
+교육용 Conveyor kit
+ ├─ Frame      → 우선 유지
+ ├─ Belt       → 유지
+ ├─ Roller     → 유지
+ ├─ Shaft      → 유지
+ └─ Motor      → 단독 smoke 후 유지/교체 결정
+                    │
+                    ├─ 유지 가능 → Arduino + 적합 driver 연결
+                    └─ 부적합     → 보유 28BYJ-48 또는 DC motor로 교체
 ```
 
-실제 구매한 벨트의 실측 둘레를 기준으로 CAD의 center distance / tension slot을 최종 조정한다.
+기존 계획의 아래 구매는 **현재 보류**한다.
 
-### 3.3 Roller / Bearing 구조
+- Ø8 × 150 mm shaft
+- 60 × 800 mm custom endless flat belt
+- 추가 608ZZ
+- 대형 3D printed frame / roller
 
-608ZZ 표준 치수는 다음을 기준으로 설계한다.
+### 3.3 Sensor / local interface
+
+우선 구성:
 
 ```text
-ID  = 8 mm
-OD  = 22 mm
-W   = 7 mm
+IR proximity 또는 HC-SR04 → object detect
+switch                    → local stop
+NeoPixel / LED            → state indication
+buzzer                     → fault / completion
+potentiometer              → optional manual speed
 ```
 
-권장 구조는 **고정 Ø8 mm shaft + roller 내부 608ZZ** 방식이다.
+일반 switch를 산업용 emergency stop이라고 부르지 않는다. 이 테스트베드에서는 **local stop**으로 정의한다.
+
+### 3.4 Serial protocol 초안
+
+아래는 구현 전 초안이며 단독 smoke 후 freeze한다.
 
 ```text
-Frame       Rotating Roller                    Frame
- │        ┌──────────────────────────┐           │
- ├─8mm──[608ZZ]                  [608ZZ]──8mm────┤
- │        └──────────────────────────┘           │
+RUN
+HALT
+SPEED <level>
+OBJECT?
+STATUS?
 ```
 
-- Shaft는 프레임에 고정한다.
-- Bearing outer race를 roller에 끼워 roller가 shaft 주위를 회전한다.
-- Drive gear는 drive roller 측면에 체결한다.
-- 608ZZ 9개 중 기본 Conveyor에 4개 사용하고 5개는 예비/Robot Base용으로 남긴다.
-
-### 3.4 Conveyor actuator
-
-우선순위 1은 보유한 `28BYJ-48 + 전용 driver`다.
+예상 응답 예시:
 
 ```text
-28BYJ-48
-   │
-3D printed small gear
-   ⚙
-    ⚙ 3D printed large gear
-        │
-   Drive Roller
+OK RUN
+OK HALT
+OK SPEED 2
+OBJECT 1
+STATE RUNNING SPEED=2 OBJECT=0
+ERR ARG_RANGE
 ```
 
-이유:
-
-- 저속 제어가 쉽다.
-- 방향 전환이 쉽다.
-- 보유 driver를 그대로 사용할 수 있다.
-- 별도 DC motor driver 구매가 필요하지 않다.
-- 데모 속도/위치 제어가 결정적이다.
-
-단독 smoke에서 토크가 부족하면 보유 DC motor + 적합 driver 방식으로 전환한다. 전환 시 firmware/Serial protocol freeze 전에 결정한다.
-
-### 3.5 Conveyor sensor / local interface
-
-우선 후보:
-
-```text
-IR proximity or HC-SR04 → object detect
-Switch                  → local stop
-Potentiometer           → optional manual speed
-NeoPixel / LED          → state indication
-Buzzer                  → fault / completion
-```
-
-Agent/MCP와 별개로 **local stop**을 둔다. 일반 택트/토글 스위치를 산업용 emergency stop이라고 부르지 않는다.
+`SPEED` 범위는 실제 motor/driver 제어 방식 확인 후 확정한다.
 
 ---
 
-## 4. Robot Arm / Sorter v1 기구 명세
+## 4. Robot Arm v2 — G56 4-DOF
 
-### 4.1 목표
+### 4.1 선택 이유
 
-- 복잡한 고하중 Robot Arm보다 **짧고 가벼운 pick-and-place / sorting arm**을 우선한다.
-- 대상 물체는 작은 스펀지 큐브, 빈 플라스틱 블록, RFID 카드가 붙은 매우 가벼운 물체를 기준으로 한다.
-- Servo 토크 한계를 넘기지 않는 것이 기능 수보다 중요하다.
+Robot Arm 기구부 직접 모델링은 보류하고 **SciPia G56 4-DOF kit**를 우선 사용한다.
 
-### 4.2 초기 치수
+선택 이유:
 
-| 항목 | v1 권장값 |
-|---|---:|
-| Base footprint | 약 **100 × 100 mm** |
-| Upper arm joint distance | **90~100 mm** |
-| Forearm joint distance | **80~90 mm** |
-| Wrist section | **40~60 mm** |
-| Gripper overall width | 약 **60~70 mm** |
-| Target reach | 약 **200~250 mm 이하** |
+- 6-DOF arm보다 구매비가 낮다.
+- servo 전류와 calibration 부담이 적다.
+- collision case와 firmware 복잡도가 줄어든다.
+- Factory Agent Hub 검증에는 4-DOF로 충분하다.
+- 목표가 robot mechanics가 아니라 capability onboarding이므로 기구 설계 시간을 줄이는 것이 유리하다.
 
-### 4.3 Servo 배치 후보
+### 4.2 동작 범위
+
+대상 물체:
+
+- 작은 sponge cube
+- 빈 plastic block
+- RFID tag가 붙은 매우 가벼운 test object
+
+고하중 pick-and-place는 범위 밖이다.
+
+### 4.3 제어 구성
 
 ```text
-MG996R      → Shoulder (가장 큰 하중)
-SG90/FS90   → Base rotation
-SG90        → Elbow
-SG90/FS90   → Wrist
-SG90/FS90   → Gripper
+Arduino Uno
+ ├─ base servo
+ ├─ shoulder servo
+ ├─ elbow servo
+ └─ gripper servo
 ```
 
-Base는 남는 608ZZ로 하중을 지지하고 Servo는 회전 토크 위주로 담당하도록 설계하는 것을 우선 검토한다.
+실제 kit servo 구성과 각 축의 safe angle은 조립 후 확인한다.
 
-Robot Arm이 일정 위험을 만들 경우 `Robot Arm`을 완성하려고 무리하지 않고 **1~2축 Sorter / Diverter + Gripper**로 축소한다. 핵심 검증은 기구 자유도가 아니라 서로 다른 실제 장비의 capability onboarding이다.
+### 4.4 Serial protocol 초안
+
+```text
+HOME
+J <joint> <angle>
+CLAW OPEN
+CLAW CLOSE
+POSE?
+STOP
+```
+
+예상 응답 예시:
+
+```text
+OK HOME
+OK J 2 90
+OK CLAW OPEN
+POSE J1=90 J2=80 J3=110 CLAW=OPEN
+ERR JOINT_RANGE
+ERR ANGLE_RANGE
+```
+
+각 joint의 실제 안전 범위는 물리 간섭을 확인한 뒤 firmware에 결정적으로 제한한다. `0..180` 전체를 무조건 허용하지 않는다.
 
 ---
 
 ## 5. Raspberry Pi Edge Gateway
 
-주 후보는 **Raspberry Pi 3B+ 1대**다. 전원과 기본 부속품은 보유 중이다.
+주 Gateway는 **Raspberry Pi 3B+ 1대**다. 전원과 기본 부속품은 보유품을 사용한다.
 
 Pi 역할:
 
@@ -252,101 +264,108 @@ Local stop handling
 Frozen text Serial protocol
 ```
 
+USB device path가 재부팅마다 바뀔 수 있으므로 `/dev/ttyACM*` 문자열을 그대로 영구 ID로 쓰지 않는다. 실제 구현에서 VID/PID, USB serial, udev symlink 등 **stable device mapping**을 확보한다.
+
 ---
 
-## 6. 구매해야 할 기계부품 — 현재 기준
-
-전자부품은 현재 추가 구매하지 않는 것을 기본으로 한다.
+## 6. 구매 계획 — v2
 
 ### Buy Now
 
-| 품목 | 권장 규격 | 수량 | 이유 |
-|---|---|---:|---|
-| Precision / linear shaft | **Ø8 mm × 150 mm** | 2개, 예비 포함 시 3개 | 608ZZ용 Conveyor roller shaft |
-| Endless flat belt | **폭 60 mm, 둘레 약 800 mm, PU/PVC, 0.8~1.5 mm** | 1개 | Conveyor belt |
-| M3 machine screw assortment | M3×8/10/12/16/20/25/30 중심 | 1세트 | Frame/printed part assembly |
-| M3 nuts | 일반 + 가능하면 nyloc 일부 | 1세트 | 풀림 방지 |
-| M3 washers | 평와셔 중심 | 1세트 | PLA/PETG 표면 하중 분산 |
+| 품목 | 상태 | 비고 |
+|---|---|---|
+| 교육용 소형 Conveyor kit | **구매 예정** | 5천~7천 원대 후보. 정확한 SKU는 크기/구성품 확인 후 확정 |
+| SciPia G56 4-DOF Robot Arm kit | **구매 예정** | 4-DOF 우선. 실제 구성품/servo 포함 여부 최종 확인 후 주문 |
 
-### Optional / CAD 확정 후
+### 보유품 사용
 
-| 품목 | 조건 |
-|---|---|
-| M3 heat-set insert | 반복 분해가 많은 3D printed joint에 사용하고 싶을 때 |
-| M4 bolt/nut/washer | tensioner / frame 일부를 M4로 설계할 때만 |
-| Spacer / collar | shaft 위치 고정이 출력 spacer만으로 불안정할 때 |
-| 추가 belt | 첫 벨트가 너무 미끄럽거나 두께/최소 pulley 직경이 맞지 않을 때 |
+- Raspberry Pi 3B+
+- Raspberry Pi 전원/부속품
+- Arduino Uno
+- sensor / RFID / LED / buzzer / switch / potentiometer
+- SG90 / FS90 / MG996R 등 spare servo
+- motor / driver 예비품
+- 608ZZ
 
-### 구매하지 않음
+### 구매 보류
 
-- 608ZZ: 9개 보유
-- Arduino / Raspberry Pi
-- SG90 / FS90 / MG996R Servo
-- 28BYJ-48 / driver
-- HC-SR04 / IR sensor / RFID / LCD / LED
-- switch / potentiometer / buzzer / resistor
-- 기성 Robot Arm / Conveyor kit
+아래는 kit 조립 후 실제 부족할 때만 산다.
+
+- M3 bolt / nut / washer assortment
+- Ø8 shaft
+- custom flat belt
+- 추가 bearing
+- coupler / pulley
+- 대형 3D printed mechanical parts
+
+`kit을 받기 전에 범용 부품을 미리 쌓아두지 않는다`를 원칙으로 한다.
 
 ---
 
-## 7. 3D 프린팅 대상
+## 7. 3D Printing 범위
+
+기구 전체 제작이 아니라 **필요한 adapter/bracket만 출력**한다.
+
+가능한 출력물:
+
+```text
+Arduino mount
+sensor bracket
+local-stop bracket
+Pi / cable management bracket
+Conveyor motor adapter (필요 시)
+Robot test-object / jig
+RFID tag holder
+small spacer / shim
+```
+
+Major frame / roller / robot link는 기성 kit를 우선 사용한다.
+
+---
+
+## 8. Hardware Bring-up 순서
+
+### Stage A — kit 자체 동작
 
 Conveyor:
 
-```text
-bearing-fit test coupon
-side frame / bearing holder
-drive roller
-idler roller
-stepper mount
-small / large drive gear
-tension slider / slot block
-sensor bracket
-local-stop bracket
-cable clips / spacers
-```
+- frame / belt / roller 조립
+- hand rotation 확인
+- motor 단독 구동
+- belt slip / derailment 확인
 
 Robot Arm:
 
-```text
-base
-bearing-supported turntable if used
-servo brackets
-upper-arm link
-forearm link
-wrist bracket
-gripper fingers / body
-cable guides
-```
+- kit 조립
+- servo center 확인
+- 축별 단독 sweep
+- safe angle 범위 기록
+- 매우 가벼운 물체 pick/place 확인
 
-### Bearing fit 시험
+### Stage B — Arduino integration
 
-전체 부품보다 먼저 작은 coupon을 출력한다.
+Conveyor:
 
-```text
-Ø22.0 mm
-Ø22.2 mm
-Ø22.4 mm
-```
+- motor driver 연결
+- object sensor 1개 연결
+- local stop 연결
+- LED state indication
+- Serial command smoke
 
-실제 프린터/재료에서 608ZZ가 적당히 들어가는 치수를 고른 뒤 production STL에 반영한다.
+Robot Arm:
 
----
+- servo power / common GND 확인
+- Arduino control
+- HOME / joint move / claw / STOP 구현
+- Serial command smoke
 
-## 8. 아직 Freeze하지 않은 항목
+### Stage C — Raspberry Pi integration
 
-다음은 실제 부품 구매/시험 후 확정한다.
-
-- 구매 Belt의 정확한 material / thickness / measured circumference
-- 실제 28BYJ-48 gearbox 출력축 치수와 gear fit
-- 보유 stepper driver 모델명
-- 3D printer의 소재(PLA/PETG), nozzle, 실제 치수 공차
-- Robot Arm 최종 DOF
-- MG996R 및 SG90/FS90의 실제 상태/토크 편차
-- Conveyor object sensor를 IR과 HC-SR04 중 무엇으로 주력할지
-- Frame를 전량 출력할지, 평판 재료 + 출력 bracket의 hybrid로 갈지
-
-이 항목은 **구매/단독 smoke 전에 사실처럼 고정하지 않는다.**
+- Arduino 2대 동시 연결
+- stable device mapping
+- serial open/read/write timeout 확인
+- device health endpoint
+- Registry 등록 전 raw adapter smoke
 
 ---
 
@@ -354,47 +373,49 @@ cable guides
 
 ### Conveyor
 
-- [ ] 608ZZ ×4 회전/끼움 확인
-- [ ] Ø8 shaft fit 확인
-- [ ] Belt 장력 조정 범위 확보
-- [ ] 28BYJ-48 단독 구동 성공
-- [ ] Motor/driver 과열 없음
-- [ ] object sensor 반복 감지
-- [ ] local stop이 Agent/MCP와 독립적으로 동작
-- [ ] USB Serial command / response smoke
+- [ ] belt가 손으로 부드럽게 회전한다.
+- [ ] motor로 30초 이상 안정적으로 운전한다.
+- [ ] belt 이탈/심한 slip이 없다.
+- [ ] object sensor가 반복 감지된다.
+- [ ] local stop이 Agent/MCP와 독립적으로 동작한다.
+- [ ] USB Serial command / response smoke가 통과한다.
+- [ ] `HALT` 후 실제 물리 정지가 확인된다.
 
-### Robot Arm / Sorter
+### Robot Arm
 
-- [ ] Servo 개별 sweep / center 확인
-- [ ] 외부 Servo 전원 사용 및 common GND 확인
-- [ ] 최대 자세에서 구조 간섭 없음
-- [ ] 저하중 pick/place 또는 sorting 반복 동작
-- [ ] local stop / safe pose 확인
-- [ ] USB Serial command / response smoke
+- [ ] 모든 servo가 개별 동작한다.
+- [ ] safe angle 범위를 실측했다.
+- [ ] 구조 간섭 없이 HOME이 가능하다.
+- [ ] 저하중 pick/place 또는 sorting을 반복할 수 있다.
+- [ ] `STOP` 또는 safe pose 동작이 확인된다.
+- [ ] USB Serial command / response smoke가 통과한다.
 
 ### Edge Gateway
 
-- [ ] Raspberry Pi 3B+ boot / network 안정
-- [ ] Arduino 2대 이상 USB Serial 동시 식별
-- [ ] 장비별 stable device mapping
-- [ ] Registry / MCP discovery / invoke smoke
-- [ ] Pi 재시작 후 상태 복원 정책 확인
+- [ ] Raspberry Pi 3B+ boot / network가 안정적이다.
+- [ ] Arduino 2대 이상을 동시에 식별한다.
+- [ ] stable device mapping이 확보된다.
+- [ ] serial timeout / disconnect를 감지한다.
+- [ ] Registry / MCP discovery / invoke smoke가 통과한다.
+- [ ] Pi 재시작 후 상태 복원 정책을 확인한다.
 
 ---
 
-## 10. 평가 시 Freeze 기준
+## 10. 평가용 Protocol Freeze
 
-실제 no-code onboarding 평가를 시작하기 전에 다음을 commit/hash로 고정한다.
+Hardware Gate 통과 후 Conveyor와 Robot Arm의 firmware / protocol을 먼저 동결한다.
+
+Freeze 대상:
 
 ```text
+Conveyor firmware + Serial protocol
+Robot Arm firmware + Serial protocol
 Setup Agent code / system prompt / examples
 Operator Agent code / system prompt / examples
 DeviceSpec / Capability schema
 Serial Adapter
 MCP Gateway
 Validator / Policy / Executor
-Conveyor firmware + Serial protocol
-Robot/Sorter firmware + Serial protocol
 ```
 
 평가 중 허용 변경:
@@ -406,4 +427,20 @@ approval / test records
 Registry data
 ```
 
-평가 중 firmware, Adapter, schema, system prompt, hidden mapping을 바꿔 새 장비를 맞추면 해당 시도는 **no-code onboarding 실패**로 기록한다.
+평가 중 firmware, Adapter, schema, system prompt, hidden mapping을 바꿔 신규 장비를 맞추면 해당 시도는 **no-code onboarding 실패**로 기록한다.
+
+---
+
+## 11. 현재 미확정 항목
+
+실제 kit 수령 전에는 다음을 사실처럼 고정하지 않는다.
+
+- Conveyor kit 정확한 SKU / 크기 / belt 폭
+- Conveyor 기본 motor 전압·전류·driver 필요 여부
+- Conveyor 기본 motor를 유지할지 교체할지
+- G56 실제 servo 모델 / 구성품 세부 내역
+- 각 Robot joint의 safe angle
+- Conveyor object sensor를 IR과 HC-SR04 중 무엇으로 주력할지
+- local stop의 최종 switch 형식
+
+이 항목들은 **수령 → 단독 smoke → Hardware Gate** 순서로 확정한다.
