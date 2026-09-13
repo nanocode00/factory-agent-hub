@@ -54,13 +54,15 @@ Raspberry Pi 3B+
 | Robot Arm | 이엘사이언스 Arduino 집게 로봇팔 4관절 |
 | Robot servo power | 5V 5A regulated adapter + C7 cable + 5.5×2.1 terminal |
 | Edge Gateway | Raspberry Pi 3B+ |
-| Device controllers | Arduino Uno ×2 |
+| Device controllers | Arduino Uno ×2 (+ spare 1 권장) |
 | Object sensor | IR proximity sensor |
-| Local stop | maintained 2-position switch, NC preferred |
+| Local stop | 동발보 `MSL-1C2P(중)-4mm` 3PIN / 1C2T slide switch ×2 |
 
-현재 장바구니 기준 구매 예정 총액은 약 **70,300원**이며 실제 결제 시 가격·배송비는 달라질 수 있다.
+local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원을 직접 차단하는 산업용 emergency stop이 아니며, Arduino firmware가 STOP 상태를 최우선으로 처리한다.
 
-> `PROJECT_PROPOSAL.md`에는 초기 검토 단계의 L-LINE 후보가 일부 남아 있다. **현재 하드웨어의 source of truth는 `HARDWARE_SPEC.md` v4와 `HARDWARE_BOM.md` v2다.** 제품 가설·Build Gate는 `PROJECT_PROPOSAL.md`를 따른다.
+현재 장바구니 기준 구매 예정 총액은 약 **70,630원**이며 실제 결제 시 가격·배송비는 달라질 수 있다.
+
+> `PROJECT_PROPOSAL.md`에는 초기 검토 단계의 L-LINE 후보와 이전 실행 가정이 일부 남아 있다. **현재 하드웨어의 source of truth는 `HARDWARE_SPEC.md`와 `HARDWARE_BOM.md`다.** 제품 가설·Build Gate는 `PROJECT_PROPOSAL.md`를 따른다.
 
 ## Validation status
 
@@ -118,8 +120,8 @@ Same Operator / Same MCP / Same Adapter
 
 | 문서 | 역할 |
 |---|---|
-| [`PROJECT_PROPOSAL.md`](./PROJECT_PROPOSAL.md) | 제품 가설, ICP/JTBD, Build Gate, MVP, 안전 경계 |
-| [`reviews/proposal-review.md`](./reviews/proposal-review.md) | 독립 기획 리뷰와 현재 `INVESTIGATE` 판정 |
+| [`PROJECT_PROPOSAL.md`](./PROJECT_PROPOSAL.md) | 제품 가설, ICP/JTBD, Build Gate, MVP, 안전 경계. 하드웨어 세부는 최신 문서가 우선 |
+| [`reviews/proposal-review.md`](./reviews/proposal-review.md) | 독립 기획 리뷰 snapshot과 `INVESTIGATE` 판정 |
 | [`HARDWARE_SPEC.md`](./HARDWARE_SPEC.md) | **현재 하드웨어 source of truth** |
 | [`HARDWARE_BOM.md`](./HARDWARE_BOM.md) | 구매품 / 보유품 / 조건부 BOM / 현재 비용 |
 | [`HARDWARE_PACKING_LIST.md`](./HARDWARE_PACKING_LIST.md) | 집에서 작업 장소로 가져갈 실제 부품 체크리스트 |
