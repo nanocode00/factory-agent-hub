@@ -1,7 +1,7 @@
 # Factory Agent Hub — Hardware Packing List
 
-> 상태: **2026-09-13 이동 준비 체크리스트 v1**  
-> 기준: `HARDWARE_SPEC.md` v4 / `HARDWARE_BOM.md` v2  
+> 상태: **2026-09-13 이동 준비 체크리스트 v2**  
+> 기준: `HARDWARE_SPEC.md` v4 / `HARDWARE_BOM.md` v3  
 > 목적: 이미 집에 보유한 부품 중 **실제 구현 장소로 가져갈 것만 선별**한다. 부품 상자 전체를 옮기지 않는다.
 
 ---
@@ -16,7 +16,6 @@
 | Arduino Uno | **3** | Conveyor 1 + Robot 1 + 예비 1 |
 | USB-B **data** cable | **3** | Arduino 2대 + 예비. 충전 전용 제외 |
 | IR proximity sensor | **2** | Conveyor primary sensor + spare |
-| maintained 2-position switch | **2~3** | 장비별 local stop. 가능하면 NC 접점 |
 | jumper wire M-M | 1 묶음 | driver / breadboard 연결 |
 | jumper wire M-F | 1 묶음 | sensor / module 연결 |
 | jumper wire F-F | 1 묶음 | module 간 연결 |
@@ -27,6 +26,8 @@
 | 일반 signal wire | 적정량 | switch / sensor / driver wiring |
 
 Arduino는 실제 사용 수량 2개보다 **1개 더 가져간다.** USB Serial, regulator, pin 이상이 생겼을 때 즉시 교체하기 위한 spare다.
+
+`MSL-1C2P` local stop switch 2개는 DeviceMart 구매품이므로 집에서 찾거나 가져올 필요가 없다.
 
 ---
 
@@ -42,7 +43,7 @@ Arduino는 실제 사용 수량 2개보다 **1개 더 가져간다.** USB Serial
 | HC-SR04 | 1~2 | IR sensor fallback |
 | buzzer | 1~2 | fault / completion feedback |
 | potentiometer | 1~2 | manual speed / calibration 테스트 |
-| push button / extra switch | 2~3 | 임시 local input / debug |
+| push button / extra switch | 2~3 | 임시 local input / debug. local stop 대체용은 아님 |
 | RC522 | 1 | 시간이 남을 때 identification demo |
 | 28BYJ-48 + driver | 1 set | Conveyor motor의 최후 fallback |
 
@@ -54,7 +55,7 @@ Arduino는 실제 사용 수량 2개보다 **1개 더 가져간다.** USB Serial
 
 | 품목 | 권장 | 이유 |
 |---|---|---|
-| 멀티미터 | **가져가기 권장** | motor 전압, continuity, common GND, switch NC/NO 확인 |
+| 멀티미터 | **가져가기 권장** | motor 전압, continuity, common GND, local stop pin mapping 확인 |
 | 소형 드라이버 세트 | 권장 | kit 조립 / terminal 체결 |
 | 니퍼 / wire stripper | 권장 | 전원·신호선 가공 |
 | 절연테이프 | 권장 | 임시 절연 |
@@ -102,7 +103,6 @@ USB-B data cable ×3
 
 ```text
 IR sensor ×2
-local-stop switch ×2~3
 breadboard ×2
 M-M / M-F / F-F jumper
 LED / resistor / NeoPixel
@@ -140,14 +140,12 @@ small double-sided tape
 - [ ] Pi power / microSD 함께 넣음
 - [ ] Uno 3개 모두 USB 인식 여부 확인 가능하면 확인
 - [ ] USB-B cable이 **data cable**인지 확인
-- [ ] local-stop 후보 switch가 maintained 타입인지 확인
-- [ ] 가능하면 multimeter로 NC/NO 접점 확인
 - [ ] IR sensor 2개 준비
 - [ ] jumper 3종 / breadboard / 전원선 준비
 - [ ] SG90 spare 3~4개 준비
 - [ ] 소형 DC motor spare 2개 준비
 - [ ] 멀티미터 / 드라이버 준비
-- [ ] 구매 예정품과 중복되는 5V PSU / motor driver를 불필요하게 추가 포장하지 않음
+- [ ] 구매 예정품과 중복되는 5V PSU / motor driver / local stop switch를 불필요하게 추가 포장하지 않음
 
 ---
 
@@ -162,13 +160,14 @@ small double-sided tape
 ├─ DRV8833 VLT-MD012
 ├─ 5V 5A servo adapter
 ├─ C7 AC cable
-└─ VLT-DC001 terminal
+├─ VLT-DC001 terminal
+└─ MSL-1C2P local stop switch ×2
 
 집에서 가져감
 ├─ Raspberry Pi 3B+
 ├─ Arduino Uno ×3
-├─ sensors / switch / status parts
-├─ wiring / breadboard
+├─ IR / fallback sensors
+├─ wiring / breadboard / status parts
 ├─ servo / motor spares
 └─ tools
 ```
