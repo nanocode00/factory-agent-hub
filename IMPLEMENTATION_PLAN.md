@@ -1,7 +1,7 @@
 # Factory Agent Hub — 2주 구현 계획안
 
-> 상태: **2026-09-13 실행안 v2 / 최종 하드웨어 반영**  
-> 전제: `HARDWARE_SPEC.md` v4의 **리브온 Conveyor + 이엘사이언스 Arduino 4-DOF Robot Arm + Raspberry Pi 3B+** 구성을 사용한다.
+> 상태: **2026-09-13 실행안 v3 / local stop 구매안 반영**  
+> 전제: `HARDWARE_SPEC.md` v4와 `HARDWARE_BOM.md` v3의 **리브온 Conveyor + 이엘사이언스 Arduino 4-DOF Robot Arm + Raspberry Pi 3B+** 구성을 사용한다.
 >
 > 목표는 멋진 로봇을 만드는 것이 아니라 **서로 다른 실제 장비 2개를 고정된 Serial Adapter와 선언적 DeviceSpec으로 등록하고, 같은 MCP 경계에서 발견·승인·실행할 수 있음을 검증하는 것**이다.
 
@@ -52,16 +52,21 @@
 - [ ] 5V 5A regulated adapter 주문
 - [ ] C7 AC cable 주문
 - [ ] VLT-DC001 5.5×2.1 terminal connector 주문
+- [ ] `MSL-1C2P(중)-4mm` 3PIN / 1C2T local stop switch ×2 주문
 
 ### Inventory Check
 
+집에서 가져갈 세부 수량은 `HARDWARE_PACKING_LIST.md`를 따른다.
+
 - [ ] Raspberry Pi 3B+ / 기존 전원 / microSD / network 준비
-- [ ] Arduino Uno 2대 선별
-- [ ] USB **data** cable 2개 이상 확인
-- [ ] IR proximity sensor 준비
-- [ ] maintained local stop switch 2개 후보 선별
+- [ ] Arduino Uno 3대 선별 — 장비 2대 + spare 1대
+- [ ] USB **data** cable 3개 확인 — 장비 2대 + spare 1개
+- [ ] IR proximity sensor 2개 준비 — primary + spare
 - [ ] LED / NeoPixel 준비
 - [ ] jumper / signal / power wire 확인
+- [ ] breadboard 2개 준비
+- [ ] servo / motor fallback 소량 준비
+- [ ] multimeter / screwdriver 등 기본 공구 준비
 - [ ] test object 준비
 
 ### Software
@@ -88,9 +93,11 @@
 5. DRV8833 연결
 6. 30초 이상 연속 구동 smoke
 7. IR object sensor 연결
-8. local stop 연결
-9. LED state indication 연결
-10. Arduino Serial command 구현
+8. `MSL-1C2P` local stop 연결
+9. local stop이 Arduino input에서 안정적으로 읽히는지 확인
+10. STOP 상태에서 motor output 즉시 disable
+11. LED state indication 연결
+12. Arduino Serial command 구현
 
 초기 protocol:
 
@@ -115,8 +122,10 @@ STATUS?
 7. 물리 간섭 지점 측정
 8. HOME pose 정의
 9. gripper open/close 정의
-10. local stop 연결
-11. Serial command 구현
+10. `MSL-1C2P` local stop 연결
+11. motion을 작은 step으로 나눠 stop input을 반복 확인하도록 firmware 구성
+12. STOP 상태에서 새 motion command를 거부하고 마지막 안전한 command 위치에서 hold
+13. Serial command 구현
 
 초기 protocol:
 
@@ -129,16 +138,20 @@ POSE?
 STOP
 ```
 
+`MSL-1C2P`는 **저전압 logic input용 local stop**으로 사용하며 motor/servo 전원을 직접 끊지 않는다. 가능하면 `INPUT_PULLUP` 기반으로 RUN 위치에서 GND에 연결하고, open/wire-disconnect 상태를 STOP으로 해석한다. 산업용 emergency stop으로 간주하지 않는다.
+
 ### Day 2 종료 Gate
 
 - [ ] Conveyor 30초 이상 연속 구동
 - [ ] HALT 시 실제 정지
 - [ ] IR sensor 반복 감지
+- [ ] Conveyor local stop → motor output disable 확인
 - [ ] Robot 모든 축 개별 동작
 - [ ] 5V 5A external servo power 안정
 - [ ] HOME 성공
 - [ ] 가벼운 물체 pick/place 3회 이상 성공
-- [ ] 두 장비 모두 local stop 확인
+- [ ] Robot motion 중 local stop 입력을 넣었을 때 추가 trajectory 진행이 중단됨
+- [ ] local stop 입력 배선 open 상태를 STOP으로 해석하는지 확인
 - [ ] 두 장비 모두 USB Serial request/response 성공
 
 실패하면 Agent 개발보다 hardware 안정화를 우선한다. Day 2에 Hardware Gate가 닫히지 않으면 Robot 노출 joint 수, sensor 수, 동작 범위를 줄인다.
@@ -384,6 +397,7 @@ MVP에서는 자유로운 event loop보다 **짧은 유한 순서**로 제한한
 - approval 후 argument 변경
 - spec version 변경 후 old approval 재사용
 - local stop 작동
+- local stop input wire disconnect
 
 write timeout은:
 
@@ -496,9 +510,10 @@ no-code onboarding evidence
 ## 15. 다음 즉시 행동
 
 1. 최종 구매안 결제
-2. 팀원별 역할 확정
-3. repo에 firmware / edge / agent 작업 skeleton 생성
-4. hardware 도착 전 Serial protocol과 DeviceSpec schema 초안 작성
-5. 도착 즉시 Day 1–2 Hardware Bring-up 수행
+2. `HARDWARE_PACKING_LIST.md` 기준 집에서 가져갈 부품 선별
+3. 팀원별 역할 확정
+4. repo에 firmware / edge / agent 작업 skeleton 생성
+5. hardware 도착 전 Serial protocol과 DeviceSpec schema 초안 작성
+6. 도착 즉시 Day 1–2 Hardware Bring-up 수행
 
 Hardware 배송을 기다리는 동안에도 schema, validator, mock serial transport, Registry, MCP interface는 개발할 수 있다. 단, mock 성공을 실제 Hardware Gate 통과로 세지 않는다.
