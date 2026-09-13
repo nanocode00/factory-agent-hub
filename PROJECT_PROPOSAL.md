@@ -2,7 +2,9 @@
 
 > 핵심 가설: **이미 지원되는 Adapter와 명령 규약 안에서, 사람이 처음 등록하는 장비의 사용법을 자연어로 설명하면 Setup Agent가 검증 가능한 DeviceSpec / Capability Spec으로 변환하고, 사람 검토·실제 테스트 후 등록하여 Operator Agent가 코드 수정 없이 기존 장비와 함께 발견·사용할 수 있다.**
 >
-> 상태: **검증 준비 단계**다. Pain 조사용 Google Form과 응답 Sheet, 수동 명세 vs 자연어 초안 비교 활동지는 준비되었고, L-LINE 컨베이어·로봇팔을 실장비 후보로 사전 검토했다. 다만 아직 설문 응답, 비교 실험 결과, 구매·조립 후 실물 smoke 결과는 없다. 따라서 아래 고객 문제·효과는 계속 `ASSUMPTION`이며, 구현 착수 여부는 §5의 Build Gate에서 실제 증거를 확인한 뒤 판단한다.
+> 현재 상태: **제품 판정은 `INVESTIGATE`, 기술 검증 prototype은 `PROCEED`**다. Pain 조사용 Google Form과 응답 Sheet, 수동 명세 vs 자연어 초안 비교 활동지는 준비되어 있고, 실제 검증에 사용할 Conveyor / Robot Arm 테스트베드와 구매 BOM도 확정했다. 다만 아직 설문 응답, 비교 실험 결과, 구매·조립 후 실물 smoke 결과는 없다. 따라서 고객 문제와 제품 효과에 대한 주장은 계속 `ASSUMPTION`으로 유지한다.
+>
+> 기술 prototype을 구현하는 이유는 제품 가치를 이미 확인했기 때문이 아니라, **고정 Serial Adapter / 선언적 계약 / 코드 무수정 온보딩이라는 기술 가설을 실제 장비로 검증하고 Build Gate에 필요한 증거를 수집하기 위해서**다. Prototype 성공만으로 제품 `GO`를 선언하지 않는다.
 
 ## 1. 누구의 어떤 일을 줄이는가
 
@@ -27,17 +29,19 @@
 ### Confirmed / Missing Evidence
 
 - Confirmed: 현재 팀이 검증하려는 제품 방향은 자연어 → 선언적 명세 → 검증 → 등록 → 발견·사용이다. 제약은 약 2주, 3~4명이다.
-- Confirmed preparation: Pain 조사 Form/응답 Sheet와 순절감 비교 활동지가 실제로 준비되어 있다. 실장비 후보의 구성품도 사전 검토했다.
-- Missing evidence: 설문 응답과 최근 통합 작업 물증, 단계별 시간·재작업 실측, 자연어 방식과 대안의 비교 결과, 총비용, 실제 장비 구매·조립·Serial smoke 결과, 팀 가용성 확인이 아직 없다.
-- 아래 수량·비율·횟수는 모두 **팀 검토용 제안 기준**이다. 관측값이나 이미 합의·달성한 목표로 읽지 않는다. 결과를 보기 전에 기준을 확정하고, 통과를 위해 사후 완화하지 않는다.
+- Confirmed preparation: Pain 조사 Form/응답 Sheet와 순절감 비교 활동지가 준비되어 있다.
+- Confirmed preparation: 실제 기술 검증용 하드웨어를 **리브온 목재 Conveyor + 이엘사이언스 Arduino 4관절 집게 Robot Arm + Raspberry Pi 3B+ + Arduino Uno ×2**로 확정했고, 구매 BOM / packing list / 2주 구현 계획을 작성했다.
+- Confirmed preparation: Conveyor motor driver는 `DRV8833 VLT-MD012`, Robot servo 외부 전원은 5V 5A regulated adapter, local stop은 `MSL-1C2P(중)-4mm` logic-input switch ×2로 정했다.
+- Missing evidence: 설문 응답과 최근 통합 작업 물증, 단계별 시간·재작업 실측, 자연어 방식과 대안의 비교 결과, 실제 장비 구매·조립·Serial smoke 결과, 코드 무수정 온보딩 재현 결과, 팀 전체 가용성 확인이 아직 없다.
+- 아래 수량·비율·횟수는 모두 **팀 검토용 제안 기준**이다. 관측값이나 이미 달성한 결과로 읽지 않는다. 결과를 보기 전에 기준을 확정하고, 통과를 위해 사후 완화하지 않는다.
 
 | 우선순위 / ASSUMPTION | 틀릴 때 영향 | 현재 근거 | 가장 싼 검증 |
 |---|---|---|---|
 | 1. 반복 통합 비용에서 명세 작성·기존 작업 연동 비중이 크다 | 핵심 고객 가치가 성립하지 않는다 | 조사 도구 준비, 실제 응답 없음 | Google Form으로 최근 6개월 실제 사례를 수집하고 구체 사례를 후속 확인 |
 | 2. 자연어 초안이 검토·수정·테스트를 포함해 수동 방식보다 총시간을 줄인다 | 기존 도구 재구현이 된다 | 비교 활동지 준비, 실험 결과 없음 | 같은 난이도의 두 장비 과제를 교차 배정해 수동 vs 자연어 초안 총시간·수정량·오류를 비교 |
-| 3. 고정 Serial Adapter와 선언적 계약이 새 장비를 표현한다 | 코드 무수정 주장이 깨진다 | L-LINE 후보 구성품 사전 검토 | 장비 firmware/Serial 규약을 먼저 완성·동결하고 두 장비를 같은 DeviceSpec 계약에 대입한 뒤 실물 smoke |
-| 4. 담당자가 정확한 명령 의미·한계·시험 조건을 제공·검토할 수 있다 | 잘못된 명세가 실제 동작을 유발한다 | 없음 | 매뉴얼/펌웨어 근거와 담당자 검토로 허용 동작·상태 확인·정지 조건 대조 |
-| 5. 가용 인원·장비가 첫 주 안에 최소 경로를 끝낼 준비가 된다 | 통합 검증 기간을 소진한다 | 장비 후보만 정리됨 | 팀 역할·가용성, 실제 보유 센서/Raspberry Pi, 키트 배송·조립·단독 제어 상태 확인 |
+| 3. 고정 Serial Adapter와 선언적 계약이 서로 다른 실제 장비를 표현한다 | 코드 무수정 주장이 깨진다 | 테스트베드와 BOM 확정, 실물 smoke 전 | Conveyor / Robot firmware와 서로 다른 text protocol을 완성·동결하고 동일 DeviceSpec / Serial Adapter 계약에 대입 |
+| 4. 담당자가 정확한 명령 의미·한계·시험 조건을 제공·검토할 수 있다 | 잘못된 명세가 실제 동작을 유발한다 | 없음 | firmware/protocol 문서와 담당자 검토로 허용 동작·상태 확인·정지 조건 대조 |
+| 5. 첫 주 안에 실제 하드웨어 경로를 안정화할 수 있다 | 통합 검증 기간을 소진한다 | 구매안·보유 재고·packing list는 확정, 조립 전 | 배송·조립 후 Day 1–2 Hardware Gate, 팀 역할·가용성 확인 |
 
 ## 3. 대안과 차별화 가설
 
@@ -72,21 +76,23 @@
 
 등록 초안과 승인 기록은 간단한 파일/CLI 출력으로 검토할 수 있으면 된다. 웹 UI는 필수가 아니다. Setup과 Operator의 역할·권한을 분리하되, 복잡한 멀티에이전트 협상이나 별도 모델 운영을 요구하지 않는다.
 
-## 5. 구현 전 최소 검증과 Build Gate
+## 5. 최소 검증과 Build Gate
 
-실제 외부 증거는 문장 수정으로 채우지 않는다. 현재는 검증 도구를 준비한 상태이며, 아래 실험 결과가 쌓이기 전에는 `INVESTIGATE`를 유지한다.
+실제 외부 증거는 문장 수정으로 채우지 않는다. 현재 제품 판정은 `INVESTIGATE`이며, 아래 실험 결과가 쌓이기 전에는 제품 `GO`로 바꾸지 않는다.
 
-### 5.1 검증 준비 현황 — 2026-09-11
+다만 **기술 검증 prototype은 `PROCEED`**한다. 그 구현과 실장비 시험 자체가 계약 적합성, 코드 무수정 온보딩 가능성, 비용·시간 측정에 필요한 증거 수집 과정이기 때문이다. Prototype 구현 허용과 제품 Build Gate 통과는 별개의 판단이다.
 
-검증 자료는 Google Drive의 `Factory Agent Hub - 기획 검증 자료` 폴더에 관리한다.
+### 5.1 검증 준비 현황 — 2026-09-13
+
+검증 자료는 Google Drive의 `Factory Agent Hub - 기획 검증 자료` 폴더에 관리한다. 하드웨어 상세는 저장소의 `HARDWARE_SPEC.md`, `HARDWARE_BOM.md`, `HARDWARE_PACKING_LIST.md`, `IMPLEMENTATION_PLAN.md`를 source of truth로 사용한다.
 
 | 검증 항목 | 준비된 산출물 / 현재 상태 | 아직 필요한 증거 |
 |---|---|---|
 | 1. Pain 존재 여부 | Google Form `Factory Agent Hub - 장비 통합 경험 조사` 생성 완료. 응답 Google Sheet 연결 완료. 최근 6개월 실제 통합 경험, 단계별 시간, 반복 빈도, 우회 방법, 남아 있는 작업 물증을 수집하도록 구성 | 실제 응답, 반복 사례의 구체성, 단계별 시간/재작업 기록, 필요 시 후속 인터뷰 |
-| 2. 장비 / 계약 적합성 | L-LINE 컨베이어·로봇팔을 우선 실장비 후보로 검토. 두 제품 모두 Arduino 기반으로 사용자 정의 Serial firmware를 구성할 수 있는 형태임을 사전 확인 | 구매/조립, 전원·로컬 정지 확인, 각 장비 단독 제어, 서로 다른 Serial 규약 smoke, DeviceSpec 수작업 대입 |
-| 3. 자연어 방식의 순절감 | Word 활동지 `Factory Agent Hub - 자연어 장비등록 비교 활동지.docx` 작성 완료. Conveyor/Robot Arm 두 과제를 교차 배정하고 총 작업시간·수정 횟수·최종 오류·Validator 통과·주관 난이도를 기록하도록 구성 | 실제 참가자 수행 결과, 수동 방식 대비 총시간/품질 차이, 실패·수정 원인 |
+| 2. 장비 / 계약 적합성 | **리브온 목재 Conveyor + 이엘사이언스 Arduino 4관절 Robot Arm + Raspberry Pi 3B+**로 테스트베드 선택 완료. DRV8833, 5V 5A servo PSU, local-stop logic switch까지 구매안 확정 | 실제 주문·수령·조립, Conveyor motor 정격/전원 확인, Robot servo 모델/구성품 확인, 각 장비 단독 제어, 서로 다른 Serial 규약 smoke, DeviceSpec 수작업 대입 |
+| 3. 자연어 방식의 순절감 | Word 활동지 `Factory Agent Hub - 자연어 장비등록 비교 활동지.docx` 작성 완료. Conveyor / Robot Arm 두 과제를 교차 배정하고 총 작업시간·수정 횟수·최종 오류·Validator 통과·주관 난이도를 기록하도록 구성 | 실제 참가자 수행 결과, 수동 방식 대비 총시간/품질 차이, 실패·수정 원인 |
 
-설문과 활동지가 준비된 사실은 **검증 준비 완료**이지 Pain이나 제품 효과의 증거가 아니다.
+설문과 활동지, 구매 BOM이 준비된 사실은 **검증 준비 완료**이지 Pain이나 제품 효과의 증거가 아니다.
 
 ### 5.2 Build Gate 실험
 
@@ -94,10 +100,10 @@
 |---|---|---|
 | Pain | 생성된 Google Form으로 최근 실제 사례를 수집한다. 최근 6개월 장비 통합 경험이 있는 응답에서 전체/단계별 시간, 반복 빈도, 우회 행동을 확인하고, 구체 사례 3건 이상은 코드·메모·커밋 등 가능한 물증으로 후속 확인한다 | 적어도 2개 이상의 구체 사례에서 반복 작업이 확인되고, 명세/연동 구간이 전체 작업의 약 25% 이상인지 본다. 추정 시간은 기록 기반 값과 분리한다. 미달·자료 부재는 INVESTIGATE 또는 ICP 재검토 |
 | 대안 / 순절감 | 준비한 활동지로 수동 명세와 자연어+AI 초안을 비교한다. 같은 참가자가 같은 장비를 두 방식으로 수행하지 않도록 A/B 과제를 교차 배정하며, 자료 읽기·AI 대기·검토·수정·재시도까지 전 시간을 포함한다 | 3명 중 2명 이상에서 자연어 방식이 수동 명세 대비 총시간 약 20% 이상을 줄이고 최종 오류/Validator 결과가 악화되지 않는지 확인한다. 불충족이면 자연어 기능 Build 보류. 소규모 결과를 시장 전체 효과로 확대하지 않는다 |
-| 계약 / 장비 | L-LINE 두 장비의 Arduino 제어를 먼저 단독으로 완성한다. 컨베이어와 로봇팔에 서로 다른 간단한 텍스트 Serial 규약을 부여하고 firmware·protocol을 동결한 뒤, 동일한 Serial Adapter/DeviceSpec 구조로 각각 표현 가능한지 확인한다 | 플랫폼 코드·schema·prompt 수정 없이 두 번째 장비를 DeviceSpec으로 표현하고, 제한된 실제 시험·상태 확인까지 가능해야 한다. firmware가 평가 도중 바뀌거나 Adapter에 장비별 특수 코드가 필요하면 무수정 성공으로 세지 않는다 |
-| 비용 / 가용성 | 총 작업 시간 × 팀이 확인한 시간당 비용 + 실제 선택 모델 사용량 × 확인한 단가 + 장비/운영비로 건당 비용 산정. 정상/재작업 경우 분리 | 기준 방식보다 총비용이 낮고 팀이 정한 실험 예산 안인지 확인. 가격·처리량·예산은 미확정이며 숫자 확보 전 비용 gate 미통과. 3~4명 가용성도 함께 확인 |
+| 계약 / 장비 | Conveyor와 Robot Arm의 Arduino 제어를 먼저 단독으로 완성한다. 두 장비에 **서로 다른 간단한 text Serial protocol**을 부여하고 firmware/protocol을 동결한 뒤, 동일 Serial Adapter/DeviceSpec 구조로 각각 표현 가능한지 확인한다 | 플랫폼 코드·schema·prompt 수정 없이 두 번째 장비를 DeviceSpec으로 표현하고, 제한된 실제 시험·상태 확인까지 가능해야 한다. 평가 도중 firmware가 바뀌거나 Adapter에 장비별 특수 코드가 필요하면 무수정 성공으로 세지 않는다 |
+| 비용 / 가용성 | 하드웨어는 2026-09-13 장바구니 기준 약 **70,630원**을 현재 testbed 비용 기준으로 기록한다. 여기에 총 작업 시간 × 팀이 확인한 시간당 비용 + 실제 선택 모델 사용량 × 확인한 단가 + 추가 운영비를 더해 정상/재작업 경우를 분리한다 | 기준 방식보다 총비용이 낮고 팀이 정한 실험 예산 안인지 확인. 모델/API 단가·팀 시간비용은 아직 미확정이며 숫자 확보 전 제품 비용 gate 미통과. 3~4명 가용성도 함께 확인 |
 
-수치만 넘겼다고 자동 GO가 되지는 않는다. 표본의 대표성, 대안의 충분성, 안전·계약 적합성까지 팀이 근거와 함께 재검토한다. Pain·중복·비용 중 하나라도 근거가 없으면 INVESTIGATE를 유지한다. 고객 가치가 없거나 대안이 충분하다는 반증이 나오면 HOLD를 검토한다. 아래 2주 일정은 gate 확인 후 승인된 범위의 계획이며, 조사 일정을 숨겨 구현 기간에 포함하지 않는다.
+수치만 넘겼다고 자동 GO가 되지는 않는다. 표본의 대표성, 대안의 충분성, 안전·계약 적합성까지 팀이 근거와 함께 재검토한다. Pain·중복·비용 중 하나라도 근거가 없으면 제품 판정은 INVESTIGATE를 유지한다. 고객 가치가 없거나 대안이 충분하다는 반증이 나오면 HOLD를 검토한다.
 
 ## 6. 코드 수정 없음과 지원 범위
 
@@ -127,7 +133,7 @@ DeviceSpec에는 장비 식별자·버전·지원 Adapter·연결 설정, Capabi
 → 결정적 Executor → Device Adapter → 장비 → 상태 확인 / 기록
 ```
 
-등록 전 Device Test도 같은 Adapter와 실행 검증 계층을 거치며, 아래 별도 시험 권한으로 제한한다.
+등록 전 Device Test도 같은 Adapter와 실행 검증 계층을 거치며 별도 시험 권한으로 제한한다.
 
 | 런타임 판단이 필요한 부분 | 결정적으로 처리할 부분 |
 |---|---|
@@ -140,17 +146,20 @@ MCP는 Registry/장비 실행을 Operator 구현과 분리하는 고정 서버 �
 
 ## 8. Safety / HITL와 실패 처리
 
-다음은 **구현·실제 시험에서 충족해야 할 제품 조건**이며 산업 현장 안전성이나 인증을 획득했다는 주장이 아니다.
+다음은 **이번 교육용 prototype에서 충족해야 할 시험 조건**이며 산업 현장 안전성이나 인증을 획득했다는 주장이 아니다.
 
-- 장비 담당자가 연결, 물리 작업 영역, 로컬 정지 수단, 허용 동작을 확인한다. 물리 비상정지·인터록은 Agent/MCP/네트워크와 독립적으로 동작해야 하며 대화 승인 대기 대상이 아니다. PLC/Arduino의 실시간 안전제어를 대체하지 않는다.
+- 장비 담당자가 연결, 물리 작업 영역, 허용 동작, 정지 수단을 확인한다. PLC/Arduino의 실시간 제어를 Agent가 대체하지 않는다.
+- 현재 testbed의 `local stop`은 **동발보 `MSL-1C2P(중)-4mm` 3PIN / 1C2T 상태 유지형 slide switch를 Arduino digital input으로 읽는 logic-level stop**이다. 모터/servo 전원을 직접 차단하는 산업용 emergency stop이 아니다.
+- local stop은 Agent/MCP/네트워크 요청과 무관하게 Arduino firmware가 최우선 처리한다. `INPUT_PULLUP` 등으로 배선 단선이 STOP으로 해석되는 방향을 우선하지만, MCU·firmware·전원에 의존하므로 독립 안전회로라고 주장하지 않는다.
+- 실제 산업 적용을 논하려면 prototype 범위 밖에서 **독립적인 물리 E-stop / interlock / power cutoff와 관련 안전 설계**를 별도로 검토해야 한다.
 - 상태는 초안 → 검증·사람 검토 → 시험 승인 → 제한된 실제 테스트 → 활성 등록으로 진행한다. 미검증 초안은 운영 discovery/invoke 대상이 아니다. 시험은 담당자가 대상·명세 버전·명령·인자·횟수를 확인한 제한 권한으로만 가능하며 일반 실행 gate를 우회하지 않는다.
 - 실제 쓰기는 대상·명세 버전·인자·실행 계획에 묶인 담당자 승인이 있어야 한다. 계획/명세 변경은 승인을 무효화하고 필요한 재검토·재시험을 거친다. 등록 승인만으로 모든 미래 동작을 허용하지 않는다.
-- 일반 정지와 재가동을 구분한다. 로컬 비상정지는 항상 독립 수단으로 확보한다. 소프트웨어 정지는 사전에 검증한 정지 capability와 결정적 정책으로 처리하며 새 대화 승인을 기다리지 않는다. 정지 실패 시 로컬 수단으로 대응한다. 재가동은 상태 확인과 새 승인을 요구한다.
+- 일반 정지와 재가동을 구분한다. software `STOP/HALT`와 local-stop 입력은 사전에 검증한 결정적 경로로 처리하며 새 대화 승인을 기다리지 않는다. 정지 실패 시 담당자가 물리적으로 장비 전원을 제거하거나 작업을 중단한다. 재가동은 상태 확인과 새 승인을 요구한다.
 - 쓰기 timeout·응답 유실은 `결과 불명`으로 기록하고 자동 재전송과 후속 동작을 중단한다. 담당자가 실제 상태를 확인하기 전 재개하지 않는다. 중복 요청은 stable operation key와 실행 기록으로 차단한다.
 - 읽기 재시도는 최초 포함 최대 2회, 명세 형식 repair는 최대 1회로 제한하는 것을 제안한다. 이후 실패/사람 확인으로 종료한다. 누락된 실제 장비 정보는 repair로 발명하지 않는다.
 - 최소 기록은 run/request id, operation key, 시각, 장비/capability와 명세 버전, 검증된 인자, 승인 상태/대상, 결과·오류 유형, 실제 상태 확인, latency다. 로그와 위험 구분은 선택 기능이 아니다.
 
-## 9. 2주 MVP 범위와 테스트베드
+## 9. 2주 MVP 범위와 현재 테스트베드
 
 ### Must
 
@@ -159,17 +168,28 @@ MCP는 Registry/장비 실행을 Operator 구현과 분리하는 고정 서버 �
 
 두 기능의 필수 구성은 Serial Adapter 하나, 고정 선언적 계약, Registry, 결정적 validation/policy/executor, 제한 시험·승인·실패 종료·최소 기록이다.
 
-### 현재 우선 테스트베드 후보
+### 현재 확정된 테스트베드
 
-현재 우선 후보는 **L-LINE Arduino 스마트팩토리 컨베이어 + L-LINE Arduino 로봇팔** 조합이다.
+하드웨어 세부 source of truth는 `HARDWARE_SPEC.md`와 `HARDWARE_BOM.md`다.
 
-- 로봇팔 구성 확인: Arduino Uno, MG996R 서보 ×2, MG90S 서보 ×2, 브레드보드/점퍼선 및 별도 전원 구성품. 4개 Servo 기반의 관절/그리퍼 Capability를 구성할 수 있다.
-- 컨베이어 구성 확인: Arduino용 모터 드라이버 쉴드, DC 모터, SG90 서보, 적외선 송수신 센서, RGB 컬러 센서, USB-B 케이블 등. 이송·정지·속도·물체/색상 상태 Capability를 구성할 수 있다.
-- 두 장비의 Serial 명령은 동일 API로 미리 표준화하지 않고, 예를 들어 컨베이어와 로봇팔에 서로 다른 텍스트 규약을 두어 DeviceSpec이 의미 차이를 흡수하는지 검증한다.
+| 역할 | 현재 선택 |
+|---|---|
+| Conveyor | **리브온 창의력 STEAM 목재 Conveyor kit**. 기본 frame / belt / roller / geared DC motor를 우선 유지 |
+| Conveyor motor control | **DRV8833 `VLT-MD012`**. Motor 정격 전압/전류와 최종 supply는 수령 후 확인 |
+| Conveyor sensing | 보유 **IR proximity sensor**를 primary object sensor로 사용. HC-SR04는 fallback |
+| Robot Arm | **이엘사이언스 Arduino 집게 로봇팔 4관절**. 실제 servo 모델/구성품과 safe angle은 수령 후 확인 |
+| Robot servo power | **5V 5A regulated external adapter + C7 AC cable + VLT-DC001 terminal**. Arduino 5V regulator에서 다중 servo를 직접 공급하지 않음 |
+| Local stop | `MSL-1C2P(중)-4mm` slide switch ×2를 Arduino logic input으로 사용 |
+| Device controllers | 보유 Arduino Uno ×2, spare 1대 권장 |
+| Edge Gateway | **Raspberry Pi 3B+**. MCP / Registry / validation / deterministic executor / Serial routing / SQLite audit 담당 |
 
-구성품 검토만으로 실장비 적합성이 확정된 것은 아니다. 구매 후 Arduino 단독 제어, 전원 안정성, 로컬 정지, USB Serial 송수신 smoke를 통과해야 §5의 장비 gate를 닫는다.
+2026-09-13 현재 구매 예정 총액은 약 **70,630원**이다. 가격/배송비는 실제 결제 시점에 달라질 수 있다.
 
-컨베이어+로봇팔 조합이 조립·전원·기구 문제로 일정에 맞지 않으면 **서로 다른 기능을 가진 두 저위험 Serial 장비**로 축소한다. 한 장비의 가짜 이름 두 개나 시뮬레이터 두 개를 실제 두 장비 증거로 세지 않는다. 최소 두 실제 장비조차 확보되지 않으면 실장비 가설 검증을 중단하고 mock 결과라고 명시한다.
+두 장비의 Serial 명령은 동일 API로 미리 표준화하지 않는다. 예를 들어 Conveyor는 `RUN / HALT / SPEED / OBJECT? / STATUS?`, Robot Arm은 `HOME / J / CLAW / POSE? / STOP`처럼 **서로 다른 고정 text protocol**을 사용하고, DeviceSpec이 의미 차이를 흡수하는지 검증한다.
+
+구매안 확정만으로 실장비 적합성이 확인된 것은 아니다. 수령 후 Arduino 단독 제어, 전원 안정성, local stop, USB Serial 송수신, 반복 동작 smoke를 통과해야 §5의 장비 gate를 닫는다.
+
+컨베이어+로봇팔 조합이 조립·전원·기구 문제로 일정에 맞지 않으면 **서로 다른 기능을 가진 두 저위험 실제 Serial 장비**로 축소한다. 한 장비의 가짜 이름 두 개나 시뮬레이터 두 개를 실제 두 장비 증거로 세지 않는다. 최소 두 실제 장비조차 확보되지 않으면 실장비 가설 검증을 중단하고 mock 결과라고 명시한다.
 
 ### Should
 
@@ -190,34 +210,36 @@ MCP는 Registry/장비 실행을 Operator 구현과 분리하는 고정 서버 �
 - PLC 대체, 무인 생산라인, 미검증 capability 운영 실행, 프롬프트만의 안전 제어: 실시간 안전·승인 책임 경계를 깨므로 제외한다.
 - 이번 MVP의 Vision, Digital Twin, 복잡한 다중 Agent 확장: 고객 가설 검증에 필수가 아니므로 제외한다. 추후 별도 고객 증거·계획 승인 없이 범위에 되넣지 않는다.
 
-## 10. 조건부 2주 일정 / 인원 / 비용
+## 10. 2주 일정 / 인원 / 비용
 
-기본 3명은 온보딩·계약 담당, 장비·Adapter·안전 담당, MCP·Operator·통합 검증 담당으로 책임을 나눈다. 4번째 인원이 있으면 비교 실험·독립 검수·증거 기록을 맡는다. 실제 담당자·가용 시간은 착수 전 확인한다. 장비 담당자는 물리 시험 승인 책임을 겸하고, 작성자가 자기 명세를 검토할 경우 다른 팀원이 대조 검수한다.
+세부 실행 순서는 `IMPLEMENTATION_PLAN.md`를 기준으로 한다. 기본 3명은 Hardware/Firmware, Setup/Contract, Edge/Operator 역할을 나누고, 4번째 인원이 있으면 Evaluation/Evidence를 별도로 맡긴다.
 
 | 기간 | 끝내야 할 결과 / 중단 기준 |
 |---|---|
-| 착수 전 | §5의 Pain 설문 배포·증거 확인, A/B 비교 실험, 인원·장비·지원 규약·정지 수단과 예산 확인. 미충족이면 INVESTIGATE 유지 |
-| Day 1–2 | 허용 범위와 안전·시험 정책 확정 후 두 장비 firmware/Serial 규약과 수동 명세를 동결하고 단독 통신/상태 확인. 표현 불가·장비 미준비 시 축소 또는 중단 |
-| Day 3–5 | 자연어 초안/질문, 검증·승인·제한 시험·등록, MCP discovery/invoke, 최소 계획 실행·기록 연결 |
-| Day 6–7 | 최소 두 장비 경로와 필수 실패 처리 확인, 데모 코드·프롬프트·Adapter·schema·firmware·protocol 동결. 미완성이면 부가 기능 제거 |
-| Day 8–11 | 정상·예외·실패 반복, 코드 무수정 감사, 실제 상태 대조, 시간·수정량·비용 수집. 결함 수정은 새 버전으로 전체 관련 기준 재확인 |
-| Day 12–14 | 독립 재현·최종 증거 정리·발표. 미달 항목과 범위를 그대로 보고 |
+| Day 0 | 최종 하드웨어 주문, 집에서 가져갈 부품 선별, 개발환경/Repo 준비 |
+| Day 1–2 | Conveyor / Robot Arm 단독 bring-up. Motor/servo/sensor/local stop/USB Serial을 Agent 없이 먼저 안정화. Hardware Gate 미통과 시 범위 축소 |
+| Day 3–7 | 서로 다른 Serial protocol 문서화, 수동 DeviceSpec, Raspberry Pi Edge Core, Serial Adapter, Registry/Audit, Validator, MCP 최소 E2E 완성 후 평가용 freeze |
+| Day 8–11 | Robot Arm 신규 온보딩, 동일 Operator/MCP 재발견, 두 장비 PlanSpec 실행, timeout/disconnect/approval/local-stop 등 실패 회귀 테스트 |
+| Day 12 | 수동 DeviceSpec vs 자연어 초안 비교 실험과 trace/latency/token/cost 관측 |
+| Day 13–14 | clean restart / Pi reboot / Arduino reconnect 포함 독립 재현과 발표 증거 정리 |
 
-실행 위치는 가용 노트북을 우선하고 Raspberry Pi는 필수로 두지 않는다. 실제 보유 센서와 Raspberry Pi 구성은 별도 재고 확인 후 역할을 정한다. 스택은 계약 검증·로컬 Registry·Serial·MCP를 충족하는 최소 구성으로 후속 설계에서 정한다. 모델/API 선택과 단가는 아직 미정이다. 장비·API·사람 검토 비용을 §5에서 확인하기 전 2주 완료나 경제성을 확정하지 않는다.
+현재 technical validation prototype에서는 **Raspberry Pi 3B+를 Edge Gateway로 필수 사용**한다. 이는 이번 테스트베드에서 장비/Agent 경계를 실제로 분리하기 위한 구현 선택이며, 모든 미래 제품 배포에서 Raspberry Pi가 필수라는 주장으로 일반화하지 않는다.
+
+현재 확인된 하드웨어 구매 예정비는 약 70,630원이다. 모델/API 비용과 팀 작업 시간 비용은 아직 미확정이며, 실제 실행 데이터를 수집한 뒤 §5 비용 gate에서 계산한다. 기술 prototype을 완성했다는 사실만으로 2주 안의 제품성이나 경제성을 확정하지 않는다.
 
 ## 11. 데모와 코드 무수정 증거
 
-기술 가설의 우선 데모는 L-LINE 컨베이어와 로봇팔이 §5의 실장비 gate를 통과했을 때 진행한다. 처음에는 첫 장비만 Registry에 등록하고, 두 번째 장비는 firmware/Serial protocol만 완성·동결된 상태로 플랫폼에는 등록하지 않는다.
+기술 가설의 우선 데모는 현재 선택한 Conveyor와 Robot Arm이 §5의 실장비 gate를 통과했을 때 진행한다. 처음에는 **Conveyor만 Registry에 등록**하고, Robot Arm은 firmware/Serial protocol만 완성·동결된 상태로 플랫폼에는 등록하지 않는다.
 
-1. Setup/Operator 코드·시스템 프롬프트·예시·MCP Gateway·Adapter·executor/validator·schema와 두 장비 firmware/protocol의 commit/hash, 초기 Registry snapshot을 남긴다. 두 번째 장비의 명령 매핑을 Operator/Setup 프롬프트·예시에 미리 넣지 않는다.
-2. 첫 조회에서는 첫 장비만 나타나는 것을 기록한다.
-3. 두 번째 장비의 사용법과 실제 동결된 Serial 규약을 자연어 사용자 입력으로 제공한다. Setup Agent가 초안을 만들고 누락 질문 → 담당자 검토 → 시험 승인 → 실제 제한 테스트를 수행한다.
+1. Setup/Operator 코드·시스템 프롬프트·예시·MCP Gateway·Adapter·executor/validator·schema와 두 장비 firmware/protocol의 commit/hash, 초기 Registry snapshot을 남긴다. Robot Arm 명령 매핑을 Operator/Setup 프롬프트·예시에 미리 넣지 않는다.
+2. 첫 조회에서는 Conveyor만 나타나는 것을 기록한다.
+3. Robot Arm의 사용법과 실제 동결된 Serial 규약을 자연어 사용자 입력으로 제공한다. Setup Agent가 초안을 만들고 누락 질문 → 담당자 검토 → 시험 승인 → 실제 제한 테스트를 수행한다.
 4. 실제 테스트를 통과한 DeviceSpec/Capability Spec만 활성 등록한다.
-5. 같은 Operator와 MCP Gateway를 수정하지 않고 다시 조회하여 새 장비/Capability가 발견되는 것을 기록한다.
-6. 기능 선택 근거, 실행 계획·담당자 승인, 두 장비 실제 실행과 상태를 기록한다. 미지원 요청도 함께 거부한다.
+5. 같은 Operator와 MCP Gateway를 수정하지 않고 다시 조회하여 Robot Arm과 Capability가 새로 발견되는 것을 기록한다.
+6. 기능 선택 근거, PlanSpec, 담당자 승인, 두 장비 실제 실행과 상태를 기록한다. 미지원 요청도 함께 거부한다.
 7. 최종 diff/hash로 허용 데이터 외 변경이 없음을 확인한다. 데모 도중 플랫폼 코드·프롬프트·Adapter·schema·firmware를 고쳤으면 해당 시도는 무수정 실패로 기록하고 새 동결 버전으로 다시 평가한다.
 
-컨베이어+로봇팔의 상위 시나리오는 “물체 감지 → 컨베이어 정지 → 로봇팔 이송 → 상태 확인 → 재가동”이다. 센서·인터록·순서 제어는 결정적으로 처리하며 재가동 승인 조건을 충족해야 한다. 기구 통합이 일정에 맞지 않으면 두 장비의 더 단순한 독립 Capability 조합으로 축소해 핵심 가설을 먼저 검증한다.
+상위 시나리오는 **“물체 감지 → Conveyor HALT → Robot pick/place → 상태 확인 → Conveyor 재가동”**이다. 센서 조건·순서·재가동 gate는 결정적으로 처리한다. 기구 배치가 일정에 맞지 않으면 두 장비의 더 단순한 독립 Capability 조합으로 축소해 핵심 가설을 먼저 검증한다.
 
 **이 데모가 보여줄 것:** 고정된 Serial 지원 규약 안에서, 플랫폼이 처음 등록하는 두 번째 실제 장비를 자연어 → 검증 → 등록으로 추가하고 기존 Operator가 코드 수정 없이 다시 발견·조합했다는 제한된 기술 결과.
 
@@ -225,7 +247,7 @@ MCP는 Registry/장비 실행을 Operator 구현과 분리하는 고정 서버 �
 
 ## 12. 테스트 가능한 완료 정의
 
-다음은 **제안 수용 기준**이며 현재 실행 결과는 없다. 테스트 입력·기대 결과를 실행 전에 확정하고 정상 성공과 안전 차단을 별도로 판정한다.
+다음은 **기술 검증 수용 기준**이며 현재 실행 결과는 없다. 테스트 입력·기대 결과를 실행 전에 확정하고 정상 성공과 안전 차단을 별도로 판정한다.
 
 | 케이스 / 제안 횟수 | 기대 결과 | 남길 증거 |
 |---|---|---|
@@ -236,9 +258,9 @@ MCP는 Registry/장비 실행을 Operator 구현과 분리하는 고정 서버 �
 | 미검증·미승인·변경된 버전 호출 각 1건 | 시험/운영 권한 구분 및 승인 무효화, 장비 전송 0회 | 버전·승인·권한·차단 기록 |
 | 연결 실패, 쓰기 응답 유실 각 1건 | 실패/결과 불명으로 종료. 쓰기 자동 재전송·후속 실행 0회 | 전송 횟수, 중단 상태, 담당자 실제 상태 확인 |
 | 같은 operation key 쓰기 재요청 1건 | 중복 동작 0회 | operation key와 실행 기록 |
-| 로컬 정지 및 재가동 gate 1회 | Agent 응답 없이 정지 수단 동작. 상태 확인·새 승인 전 재가동 없음 | 장비 담당자 관찰 기록과 실행 trace |
+| local-stop 및 재가동 gate 1회 | Agent/MCP 요청과 무관하게 Arduino local-stop 경로가 motion/output을 중단. 상태 확인·새 승인 전 재가동 없음 | 장비 담당자 관찰 기록과 실행 trace |
 
-모든 차단 케이스는 기대한 차단을 충족해야 한다. 정상 3회가 모두 성공해도 대규모 신뢰성을 의미하지 않는다. 실제 상태 증거는 독립 관찰·센서/장비 응답 등 장비에 맞는 방법으로 담당자가 정하고, 명령 전송 성공만으로 동작 완료를 선언하지 않는다. 장비 전송이 필요 없는 오류 입력은 mock으로 먼저 확인할 수 있지만, 실제 두 장비 성공·정지 수단은 실물 증거가 필요하다.
+모든 차단 케이스는 기대한 차단을 충족해야 한다. 정상 3회가 모두 성공해도 대규모 신뢰성을 의미하지 않는다. 실제 상태 증거는 독립 관찰·센서/장비 응답 등 장비에 맞는 방법으로 담당자가 정하고, 명령 전송 성공만으로 동작 완료를 선언하지 않는다. 장비 전송이 필요 없는 오류 입력은 mock으로 먼저 확인할 수 있지만, 실제 두 장비 성공·local-stop은 실물 증거가 필요하다.
 
 최종 기술 검증 묶음에는 명세/Registry 전후본, 코드·프롬프트·firmware 변경 감사, 케이스별 결과와 실패 원인, 승인·실행 기록, 실제 상태 증거, 비용·시간 측정을 포함한다. 기술 완료와 제품 Build Gate의 Pain/대안/비용 판정은 별도로 남긴다.
 
@@ -247,9 +269,9 @@ MCP는 Registry/장비 실행을 Operator 구현과 분리하는 고정 서버 �
 | 항목 | 현재 상태 | 다음 액션 |
 |---|---|---|
 | 1. 첫 ICP에서 반복적이고 유의미한 Pain이 있는가 | **검증 도구 준비 완료 / 증거 수집 전** | 생성된 Google Form을 배포하고 최근 실제 사례·단계별 시간·반복·우회 행동을 수집 |
-| 2. 두 실제 장비가 고정 Serial 계약으로 표현되고 안전하게 시험 가능한가 | **사전 구성품 검토 완료 / 실물 확인 전** | L-LINE 키트 구매·조립 후 Arduino 단독 제어, 전원/정지, 서로 다른 Serial 규약 smoke와 DeviceSpec 대입 |
+| 2. 두 실제 장비가 고정 Serial 계약으로 표현되고 안전하게 시험 가능한가 | **테스트베드/구매안 확정 / 실물 확인 전** | 리브온 Conveyor와 이엘사이언스 Robot Arm을 수령·조립하고 Arduino 단독 제어, 전원/local-stop, 서로 다른 Serial 규약 smoke와 DeviceSpec 대입 |
 | 3. 자연어 방식이 수동 명세보다 순시간/품질 면에서 유리한가 | **활동지 준비 완료 / 비교 실험 전** | A/B 교차 활동을 수행하고 총시간·수정 횟수·오류·Validator 결과를 기록 |
-| 4. 새 장비별 플랫폼 코드·시스템 프롬프트·firmware 변경 없이 데모를 재현할 수 있는가 | 미검증 | 평가 전에 플랫폼과 testbed firmware/protocol을 동결하고 전후 hash/diff 감사 |
-| 5. 인원·장비·예산을 확인해 첫 주 구현/둘째 주 검증을 지킬 수 있는가 | 부분 확인 | 보유 센서/Raspberry Pi 재고와 팀 역할·가용 시간, 키트 구매비, 모델/API 비용 확인 |
+| 4. 새 장비별 플랫폼 코드·시스템 프롬프트·firmware 변경 없이 데모를 재현할 수 있는가 | 미검증 | Hardware Gate 후 플랫폼과 testbed firmware/protocol을 동결하고 전후 hash/diff 감사 |
+| 5. 인원·장비·예산을 확인해 첫 주 구현/둘째 주 검증을 지킬 수 있는가 | **장비/BOM/보유 재고는 구체화, 팀/API 비용은 부분 미확정** | 하드웨어 주문·수령 일정, 팀 역할/가용 시간, 모델/API 비용을 확정하고 Day 0–2 Gate 확인 |
 
-현재 판정은 **INVESTIGATE**다. 다만 이전처럼 “무엇을 검증해야 하는가”만 있는 상태는 아니며, 1번과 3번은 실제 실행 도구가 준비되었고 2번은 실장비 후보와 firmware 전략이 구체화되었다. 다음 판정은 설문 응답, A/B 활동 결과, 실물 smoke 증거가 들어온 뒤 다시 수행한다.
+현재 제품 판정은 **INVESTIGATE**다. 동시에 기술 검증 prototype은 **PROCEED**한다. 다음 제품 판정은 설문 응답, A/B 활동 결과, 실물 smoke, 코드 무수정 온보딩 증거가 들어온 뒤 다시 수행한다.
