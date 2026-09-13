@@ -1,7 +1,7 @@
 # Factory Agent Hub — Hardware Packing List
 
 > 상태: **2026-09-13 이동 준비 체크리스트 v2**  
-> 기준: `HARDWARE_SPEC.md` v4 / `HARDWARE_BOM.md` v3  
+> 기준: `HARDWARE_SPEC.md` v5 / `HARDWARE_BOM.md` v3  
 > 목적: 이미 집에 보유한 부품 중 **실제 구현 장소로 가져갈 것만 선별**한다. 부품 상자 전체를 옮기지 않는다.
 
 ---
