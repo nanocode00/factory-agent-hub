@@ -1,111 +1,197 @@
 # Factory Agent Hub — Hardware BOM
 
-> 상태: **2026-09-12 BOM v1**  
-> 기준: `HARDWARE_SPEC.md`의 저가 Conveyor kit + SciPia G56 4-DOF + Raspberry Pi 3B+ 구성  
-> 목적: **기구 kit 자체에 기대하는 부품과 Factory Agent Hub가 별도로 준비해야 하는 부품을 분리**해, 불필요한 선구매를 막는다.
+> 상태: **2026-09-13 BOM v2 / 구매 최종안**  
+> 기준: `HARDWARE_SPEC.md` v4의 Conveyor + Arduino 4-DOF Robot Arm + Raspberry Pi 3B+ 구성  
+> 목적: **kit 자체 구성, 별도 구매 전자부품, 보유 재고, 수령 후 조건부 항목을 분리**해 불필요한 선구매를 막는다.
 
 ---
 
-## 1. 구매하는 두 기구 kit
+## 1. 최종 구매 구성
 
-| 구분 | 선택품 | 수량 | 현재 확인된 정보 |
+### DeviceMart
+
+| 품목 | 수량 | 표시 단가 (VAT 별도) | 용도 |
+|---|---:|---:|---|
+| DRV8833 Motor Driver Module `VLT-MD012` | 1 | 1,700원 | Conveyor geared DC motor 제어 |
+| DC 5.5×2.1 terminal connector `VLT-DC001` | 1 | 700원 | 5V servo PSU 출력을 screw terminal로 분배 |
+| Regulated adapter 5V 5A, DC 5.5×2.1 | 1 | 7,800원 | Robot Arm servo 외부 전원 |
+| 8자(C7) AC power cable | 1 | 2,000원 | 5V 5A adapter AC 입력 |
+| **이엘사이언스 Arduino 집게 로봇팔 4관절** | 1 | 40,000원 | Robot Arm 기구 / servo testbed |
+
+DeviceMart 장바구니 기준:
+
+```text
+상품 주문 금액   52,200원
+부가세            5,220원
+배송비            6,200원
+--------------------------
+결제 예정 금액   63,620원
+```
+
+배송비는 전자부품과 Robot Arm이 서로 다른 출고 그룹으로 잡힌 현재 장바구니 기준이다.
+
+### Coupang
+
+| 품목 | 수량 | 가격 | 배송 |
+|---|---:|---:|---|
+| **리브온 창의력 STEAM 목재 컨베이어 벨트** | 1 | 6,680원 | 현재 장바구니 무료배송 |
+
+### 현재 구매 예정 총액
+
+```text
+DeviceMart  63,620원
+Coupang      6,680원
+------------------
+합계        70,300원
+```
+
+가격과 배송비는 실제 결제 시점에 변동될 수 있으므로 주문 직전 다시 확인한다.
+
+---
+
+## 2. 구매하는 두 기구 kit
+
+| 구분 | 선택품 | 수량 | 현재 판단 |
 |---|---|---:|---|
-| Conveyor | **리브온 창의력 STEAM 목재 만들기 컨베이너벨트** | 1 | 완성 크기 267 × 66 × 76 mm. belt 폭과 motor 전기 사양은 수령 후 실측 |
-| Robot Arm | **SciPia G56 4-DOF Arduino Robot Arm Starter Kit** | 1 | 4-DOF, 판매가 43,900원 기준. 실제 servo 모델과 세부 구성품은 수령 후 확인 |
+| Conveyor | **리브온 목재 Conveyor kit** | 1 | frame / belt / roller / shaft / geared DC motor를 우선 그대로 사용 |
+| Robot Arm | **이엘사이언스 Arduino 집게 로봇팔 4관절** | 1 | Arduino 제어 전제를 선택. MYLOOP 보드 버전은 사용하지 않음 |
 
-Conveyor 후보 링크: https://item.gmarket.co.kr/Item?goodsCode=4532930639  
-G56 공식 상품 링크: https://scipia.com/product/detail.html?product_no=591
-
-두 kit는 **기구 구조를 빠르게 확보하기 위한 testbed**다. 제품 가설은 kit 성능이 아니라, 서로 다른 실제 장비를 고정 Serial Adapter / DeviceSpec / MCP 경계에서 등록·발견·실행할 수 있는지로 검증한다.
+Robot Arm의 servo는 사진상 SG90-class micro servo와 유사하지만 정확한 모델은 **수령 후 label 확인** 대상으로 남긴다.
 
 ---
 
-## 2. Kit 밖에서 반드시 필요한 BOM
+## 3. 별도 구매 전자부품
 
-| 품목 | 수량 | 상태 | 용도 / 결정 |
+| 품목 | 수량 | 상태 | 결정 |
 |---|---:|---|---|
-| Raspberry Pi 3B+ | 1 | **보유 확인** | Factory Edge Gateway |
-| Raspberry Pi 전원 / microSD / 기본 부속품 | 1 set | **보유 확인** | Pi 구동 |
-| Arduino Uno | 2 | **보유 확인 (9개)** | Conveyor / Robot 각각 전용 controller |
-| USB data cable | 2 | **재고 확인 필요** | Pi ↔ Arduino Serial. 충전 전용 케이블 제외 |
-| IR proximity sensor | 1 | **보유 확인 (4개)** | Conveyor 주 object sensor |
-| maintained 2-position switch | 2 권장 | **형식 확인 필요** | 장비별 local stop. 가능하면 NC 접점 우선 |
-| LED 또는 NeoPixel | 2 | **보유 확인** | 장비별 READY / RUNNING / ERROR 상태 표시 |
-| jumper wire / signal wire | 적정량 | **재고 확인 필요** | Arduino ↔ sensor / switch / driver / servo |
-| breadboard 또는 terminal / distribution 부품 | 1~2 set | **재고 확인 필요** | 전원·신호 배선 정리 |
-| GND / power distribution wiring | 적정량 | **재고 확인 필요** | 외부 전원과 Arduino common GND 구성 |
-| 가벼운 test object | 2~3 | 제작 가능 | pick/place 및 Conveyor 이송용. 3D print / foam / cardboard 가능 |
+| DRV8833 `VLT-MD012` | 1 | **구매 최종안** | Conveyor motor driver |
+| 5V 5A regulated adapter | 1 | **구매 최종안** | Robot Arm servo 전원 전용 |
+| C7 AC cable | 1 | **구매 최종안** | 5V 5A adapter 입력 |
+| VLT-DC001 5.5×2.1 terminal | 1 | **구매 최종안** | servo PSU +5V/GND 분배 |
 
-`maintained switch`는 순간 복귀형 push button보다 **상태가 유지되는 토글/락킹 방식**을 우선한다. 일반 switch를 산업용 emergency stop이라고 부르지 않고, 본 프로젝트에서는 `local stop`으로 정의한다.
+**Step-down converter는 구매하지 않는다.** 5V 5A adapter는 Robot Arm servo 전원을 위한 것이며 Conveyor motor 전원은 kit 수령 후 별도로 확정한다.
 
 ---
 
-## 3. 재고 확인 후에만 구매하는 조건부 BOM
+## 4. 보유품 사용
 
-| 품목 | 조건 | 권장 방향 |
-|---|---|---|
-| Robot servo 외부 전원 | G56용으로 적합한 보유 전원이 없을 때 | **5V regulated, 약 4A급 권장**. Arduino 5V regulator로 여러 servo를 공급하지 않음 |
-| Conveyor motor driver | kit 기본 motor를 유지하고, 보유 driver가 그 motor에 맞지 않을 때 | motor 전압/정지전류 측정 후 결정. 소형 DC motor라면 TB6612FNG / DRV8833 계열 우선 검토 |
-| Conveyor 별도 motor 전원 | kit 기본 전원 방식이 Arduino integration에 부적합할 때 | motor 실측 전압·전류에 맞춰 구매 |
-| connector / terminal block | 보유 jumper/breadboard만으로 배선이 불안정할 때 | 저전압 DC용 소형 terminal 사용 |
-| cable tie / 양면테이프 / hot glue | kit에 sensor/switch를 고정할 수단이 없을 때 | 임시 testbed 고정용 |
-| 3D printed bracket | 실제 kit hole/형상과 sensor가 맞지 않을 때 | sensor / Arduino / switch adapter만 출력 |
-
-Conveyor motor driver는 **kit 수령 전 선구매하지 않는다.** motor가 DC인지, 요구 전압·전류가 얼마인지 확인한 뒤 결정한다.
+| 품목 | 필요 수량 | 보유 상태 | 용도 |
+|---|---:|---|---|
+| Raspberry Pi 3B+ | 1 | 보유 | Factory Edge Gateway |
+| Pi 전원 / microSD / 기본 부속품 | 1 set | 보유 | Pi 구동 |
+| Arduino Uno | 2 | 9개 보유 | Conveyor / Robot 전용 controller |
+| IR proximity sensor | 1 | 4개 보유 | Conveyor primary object detect |
+| HC-SR04 | 0~1 | 13개 보유 | fallback / optional distance |
+| SG90 | spare | 12개 보유 | Robot servo spare |
+| FS90 | spare | 5개 보유 | Robot servo spare |
+| MG996R | spare | 1개 보유 | 필요 시 고토크 실험 |
+| LED / NeoPixel | 2 | 보유 | 상태 표시 |
+| buzzer | optional | 보유 | fault / completion |
+| switch / button / potentiometer | 적정량 | 보유 | local stop / local UI |
+| RC522 | optional | 10개 보유 | demo 확장 시 identification |
+| 608ZZ | optional | 9개 보유 | 기구 보강 필요 시 |
 
 ---
 
-## 4. 현재 구매하지 않는 품목
+## 5. 재고 확인이 필요한 kit 밖 BOM
 
-아래는 직접 기구를 제작하던 v1 계획에서는 후보였지만, 기성 kit 전략으로 변경하면서 기본 BOM에서 제거한다.
+| 품목 | 수량 | 확인 내용 |
+|---|---:|---|
+| USB data cable | 2 | Pi ↔ Arduino Serial. 충전 전용 케이블 제외 |
+| maintained 2-position switch | 2 권장 | local stop. 가능하면 NC 접점 |
+| jumper / signal wire | 적정량 | sensor / switch / driver / servo signal |
+| power wire | 적정량 | servo +5V / GND distribution |
+| breadboard / terminal / distribution parts | 1~2 set | 배선 정리 |
+| cable tie / 양면테이프 / hot glue | 필요 시 | sensor / switch 임시 고정 |
+| 가벼운 test object | 2~3 | foam / cardboard / 3D print 등 |
+
+---
+
+## 6. 수령 후에만 결정하는 조건부 BOM
+
+### Conveyor motor power
+
+Conveyor motor는 사진상 3V급 geared DC motor 계열로 보이지만, **정확한 motor supply는 아직 구매하지 않는다.**
+
+수령 후 확인:
+
+```text
+motor label / 기본 battery 또는 power 구성
+rated voltage
+no-load behavior
+DRV8833 연결 시 안정성
+30초 연속 운전 온도
+```
+
+필요하면 그때 motor 정격에 맞는 별도 저전압 DC 전원을 추가한다.
+
+### Mechanical adapters
+
+다음은 실제 기구 hole / 형상과 보유 부품이 맞지 않을 때만 준비한다.
+
+- sensor bracket
+- local-stop bracket
+- Arduino mount
+- spacer / shim
+- cable management part
+
+가능하면 3D print로 해결한다.
+
+---
+
+## 7. 현재 구매하지 않는 품목
 
 | 품목 | 현재 판단 |
 |---|---|
+| Step-down converter | **구매 안 함** |
 | Ø8 mm shaft | 구매 안 함 |
 | custom PU/PVC endless flat belt | 구매 안 함 |
 | 추가 608ZZ | 구매 안 함 — 9개 보유 |
-| M3 bolt / nut / washer assortment | **선구매 안 함** — kit 조립 후 정말 필요할 때만 |
-| 추가 SG90 / FS90 / MG996R | 구매 안 함 — 보유 spare 사용 |
+| M3 bolt / nut / washer assortment | 선구매 안 함 |
+| 추가 servo | 구매 안 함 — 보유 spare 사용 |
+| coupler / pulley | 선구매 안 함 |
 | 대형 Conveyor frame / roller 3D print | 하지 않음 |
 | Robot Arm link / base 전체 3D print | 하지 않음 |
-| RFID reader | 추가 구매 안 함 — RC522 10개 보유, demo 확장 시 사용 |
-| HC-SR04 | 추가 구매 안 함 — 13개 보유, IR sensor의 fallback |
+| RFID reader | 추가 구매 안 함 |
+| HC-SR04 | 추가 구매 안 함 |
 
 ---
 
-## 5. 장비별 조립 BOM
+## 8. 장비별 조립 BOM
 
 ### Conveyor node
 
 ```text
-[Conveyor mechanical kit]
+[리브온 Conveyor mechanical kit]
         +
 Arduino Uno ×1
+DRV8833 VLT-MD012 ×1
 IR proximity sensor ×1
 local stop switch ×1
 status LED / NeoPixel ×1
 USB data cable ×1
-motor driver ×1       # 조건부: kit motor와 보유 driver 확인 후
-motor power ×1        # 조건부
+motor power ×1        # 수령 후 정격 확인 뒤 확정
 wiring / mount
 ```
 
-기본 motor는 **우선 유지**한다. 단독 smoke에서 제어 불가, 토크 부족, 과열, 지나친 속도, driver 부적합 중 하나가 확인될 때만 보유 motor로 교체한다.
+기본 motor는 우선 유지한다. 단독 smoke에서 제어 불가, 토크 부족, 과열, 지나친 속도, 기구 문제 중 하나가 확인될 때만 교체한다.
 
 ### Robot Arm node
 
 ```text
-[G56 4-DOF mechanical/servo kit]
+[이엘사이언스 Arduino 4-DOF Gripper Arm]
         +
 Arduino Uno ×1
+5V 5A regulated adapter ×1
+C7 AC cable ×1
+VLT-DC001 terminal connector ×1
 local stop switch ×1
 status LED / NeoPixel ×1
 USB data cable ×1
-external regulated servo power ×1   # 보유 여부 확인
 common GND wiring
 ```
 
-G56의 servo를 Arduino Uno 5V regulator에서 직접 여러 개 구동하지 않는다. Robot의 joint safe angle은 조립 후 물리 간섭을 측정하여 firmware에 제한한다.
+servo를 Arduino Uno 5V regulator에서 직접 여러 개 구동하지 않는다. Servo signal은 Arduino에서 주고, 전원은 external 5V 5A PSU에서 공급한다.
 
 ### Edge Gateway
 
@@ -119,31 +205,29 @@ Pi에는 LLM을 올리지 않고 MCP / Registry / validation / deterministic exe
 
 ---
 
-## 6. 수령 직후 BOM 확인 체크
+## 9. 수령 직후 BOM 확인 체크
 
-Conveyor 수령 직후 기록:
+### Conveyor
 
 ```text
 actual overall size
 belt width
-motor type
-motor label / rated voltage if present
-no-load current / stall-current estimate where safely measurable
-included power source
+motor exact type / label
+rated voltage / basic power source
 shaft / roller accessibility
 motor ↔ roller coupling
+DRV8833 smoke result
 ```
 
-G56 수령 직후 기록:
+### Robot Arm
 
 ```text
 servo model labels
 servo count
 included fasteners / horn / cable
-Arduino 포함 여부
-전원 관련 구성품
 joint mechanical limits
 HOME candidate pose
+5V 5A PSU load smoke
 ```
 
-이 결과로 조건부 BOM을 닫는다. **수령 전에 확인할 수 없는 값을 추정해서 driver, power supply, fastener를 선구매하지 않는다.**
+이 결과로 남은 조건부 BOM을 닫는다. **수령 전 확인할 수 없는 motor supply, fastener, adapter를 추정 구매하지 않는다.**
