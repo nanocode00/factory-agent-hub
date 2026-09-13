@@ -2,7 +2,7 @@
 
 > **자연어로 설명한 새 설비를 검증 가능한 DeviceSpec / Capability Spec으로 변환하고, 사람 검토·실장비 테스트 후 Registry에 등록하여 기존 장비와 함께 발견·실행하는 Agent Platform 실험 프로젝트**
 
-현재 단계는 **검증 준비 / 하드웨어 구매·bring-up 직전**이다. 문서 구조와 테스트베드 계획은 구현 가능한 수준까지 정리되었지만, 고객 Pain·순절감·실장비 성공 결과는 아직 관측되지 않았다. 따라서 현재 제품 판정은 `INVESTIGATE`를 유지한다.
+현재 단계는 **검증 준비 / 하드웨어 구매·bring-up 직전**이다. 문서 구조와 테스트베드 계획은 구현 가능한 수준까지 정리되었지만, 고객 Pain·순절감·실장비 성공 결과는 아직 관측되지 않았다. 따라서 **제품 판정은 `INVESTIGATE`를 유지하고, 증거 수집을 위한 기술 검증 prototype은 `PROCEED`한다.**
 
 ## What this project is testing
 
@@ -62,11 +62,11 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 
 현재 장바구니 기준 구매 예정 총액은 약 **70,630원**이며 실제 결제 시 가격·배송비는 달라질 수 있다.
 
-> `PROJECT_PROPOSAL.md`에는 초기 검토 단계의 L-LINE 후보와 이전 실행 가정이 일부 남아 있다. **현재 하드웨어의 source of truth는 `HARDWARE_SPEC.md`와 `HARDWARE_BOM.md`다.** 제품 가설·Build Gate는 `PROJECT_PROPOSAL.md`를 따른다.
+> 제품 가설·Build Gate·prototype 진행 상태는 `PROJECT_PROPOSAL.md`를 따르고, **현재 하드웨어의 source of truth는 `HARDWARE_SPEC.md`와 `HARDWARE_BOM.md`**다.
 
 ## Validation status
 
-현재 독립 기획 리뷰의 최종 판정은 **INVESTIGATE**다.
+현재 독립 기획 리뷰의 최종 판정은 **INVESTIGATE**다. 이는 제품 가치 판정이며, 현재 기술 prototype 구현 중단을 의미하지 않는다.
 
 문서로 준비된 것:
 
@@ -120,7 +120,7 @@ Same Operator / Same MCP / Same Adapter
 
 | 문서 | 역할 |
 |---|---|
-| [`PROJECT_PROPOSAL.md`](./PROJECT_PROPOSAL.md) | 제품 가설, ICP/JTBD, Build Gate, MVP, 안전 경계. 하드웨어 세부는 최신 문서가 우선 |
+| [`PROJECT_PROPOSAL.md`](./PROJECT_PROPOSAL.md) | 제품 가설, ICP/JTBD, Build Gate, prototype 진행 상태, MVP, 안전 경계 |
 | [`reviews/proposal-review.md`](./reviews/proposal-review.md) | 독립 기획 리뷰 snapshot과 `INVESTIGATE` 판정 |
 | [`HARDWARE_SPEC.md`](./HARDWARE_SPEC.md) | **현재 하드웨어 source of truth** |
 | [`HARDWARE_BOM.md`](./HARDWARE_BOM.md) | 구매품 / 보유품 / 조건부 BOM / 현재 비용 |
@@ -147,4 +147,4 @@ Same Operator / Same MCP / Same Adapter
 
 ---
 
-**Current status:** `INVESTIGATE — planning/build design ready, external evidence pending`
+**Current status:** `PRODUCT = INVESTIGATE / TECHNICAL VALIDATION PROTOTYPE = PROCEED`
