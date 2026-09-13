@@ -1,6 +1,6 @@
 # Factory Agent Hub — Hardware Testbed Specification
 
-> 상태: **2026-09-13 설계안 v4 / 구매 최종안 반영**  
+> 상태: **2026-09-13 설계안 v5 / local stop 확정**  
 > 목적: 기구부를 직접 설계·제작하는 데 시간을 쓰기보다, 기성 교육용 기구 kit + 보유 전자부품을 결합해 실제 Conveyor / Robot Arm 테스트베드를 빠르게 확보한다.
 >
 > 이 문서는 현재 하드웨어 구현의 기준 문서다. `PROJECT_PROPOSAL.md`의 과거 L-LINE 후보보다 **현재 테스트베드 구성에 대해서는 이 문서를 우선**한다. 세부 구매 수량·가격·재고 상태는 [`HARDWARE_BOM.md`](./HARDWARE_BOM.md)를 따른다.
@@ -61,11 +61,15 @@ Raspberry Pi 전원과 기본 부속품은 보유품을 사용한다.
 
 - Conveyor primary object sensor: **IR proximity sensor**
 - HC-SR04: fallback / optional distance sensor
-- Local stop: **상태 유지형 2-position switch**, 가능하면 NC 접점 우선
+- Local stop: **동발보 `MSL-1C2P(중)-4mm` slide switch ×2**
+  - 3PIN / 1C2T(SPDT), 상태 유지형
+  - 장비별 1개씩 Arduino digital input에 연결
+  - motor / servo power를 직접 차단하지 않음
+  - 가능한 경우 `INPUT_PULLUP` 기반으로 open / wire-disconnect를 STOP으로 해석
 - Status: LED 또는 NeoPixel
 - Buzzer / potentiometer / LCD 등은 필요할 때만 추가
 
-일반 switch를 산업용 emergency stop이라고 부르지 않고 `local stop`으로 정의한다.
+일반 slide switch를 산업용 emergency stop이라고 부르지 않고 `local stop`으로 정의한다. 이 장치는 Agent/MCP/network를 거치지 않고 Arduino firmware가 직접 읽는 로컬 정지 입력이다.
 
 ---
 
@@ -87,11 +91,11 @@ Raspberry Pi 3B+
   │
   ├─ USB Serial → Arduino #1 → DRV8833 → Conveyor
   │                           ├─ IR sensor
-  │                           └─ local stop
+  │                           └─ MSL-1C2P local stop
   │
   └─ USB Serial → Arduino #2 → 4-DOF Robot Arm
                               ├─ Servo ×4
-                              └─ local stop
+                              └─ MSL-1C2P local stop
 ```
 
 원칙:
@@ -127,14 +131,14 @@ Google Drive `부품 목록` 기준 핵심 재고:
 | RFID | RC522 | 10 | optional identification |
 | Display | LCD | 11 | optional local status |
 | Status | NeoPixel / LED | 다수 | READY/RUNNING/ERROR |
-| Input | switch / button / potentiometer | 다수 | local stop / manual control |
+| Input | button / potentiometer / 일반 switch류 | 다수 | debug / manual control. maintained local stop은 별도 구매 |
 | Alert | buzzer | 다수 | fault / completion |
 
-LED, 저항, 점퍼선 계열, 스위치류 등은 보유품을 우선 확인하고 부족분만 구매한다.
+LED, 저항, 점퍼선 계열 등은 보유품을 우선 확인하고 부족분만 구매한다.
 
 ---
 
-## 4. Conveyor v4
+## 4. Conveyor v5
 
 ### 4.1 기구 유지 정책
 
@@ -195,17 +199,17 @@ ERR ARG_RANGE
 ### 4.3 Sensor / Local Stop
 
 ```text
-IR proximity sensor      → primary OBJECT detect
-maintained switch        → local stop
-LED / NeoPixel           → status
-HC-SR04                  → fallback only
+IR proximity sensor         → primary OBJECT detect
+MSL-1C2P maintained switch  → local stop logic input
+LED / NeoPixel              → status
+HC-SR04                     → fallback only
 ```
 
-local stop은 Agent/MCP와 무관하게 Arduino의 deterministic path에서 최우선 처리한다.
+local stop은 Agent/MCP와 무관하게 Arduino의 deterministic path에서 최우선 처리한다. STOP 상태에서는 DRV8833 출력을 disable하고 새 RUN/SPEED write를 거부한다.
 
 ---
 
-## 5. Robot Arm v4 — Arduino 4-DOF Gripper Arm
+## 5. Robot Arm v5 — Arduino 4-DOF Gripper Arm
 
 ### 5.1 목표
 
@@ -249,7 +253,20 @@ Servo +5V / GND rail
 
 Arduino와 servo 전원은 **GND를 공통**으로 연결한다. 외부 5V adapter를 Arduino USB 전원과 임의로 병렬 역급전하지 않는다.
 
-### 5.4 Serial Protocol 초안
+### 5.4 Local Stop
+
+Robot Arm local stop은 servo 전원을 직접 끊지 않는다. Firmware에서 joint 이동을 큰 단일 점프 대신 작은 command step으로 진행하고 각 step 사이에 `MSL-1C2P` input을 확인한다.
+
+STOP 상태에서는:
+
+- 신규 `HOME`, `J`, `CLAW` write를 거부한다.
+- 진행 중 trajectory의 다음 step을 실행하지 않는다.
+- 마지막으로 command한 안전 위치를 hold한다.
+- 재개 전에 현재 상태 확인과 명시적 재가동 절차를 요구한다.
+
+servo 자체의 내부 위치 feedback은 없는 것으로 가정하므로, 이 동작을 산업용 안전정지로 해석하지 않는다. 실제 중단 반응은 Hardware Gate에서 실측한다.
+
+### 5.5 Serial Protocol 초안
 
 ```text
 HOME
@@ -297,7 +314,7 @@ Conveyor motor
 
 ---
 
-## 7. 구매 계획 — v4
+## 7. 구매 계획 — v5
 
 상세 가격과 구매처는 `HARDWARE_BOM.md`를 따른다.
 
@@ -311,15 +328,19 @@ Conveyor motor
 | DC 5.5×2.1 terminal `VLT-DC001` | 1 | **구매 최종안** |
 | 5V 5A regulated adapter | 1 | **구매 최종안** |
 | 8자(C7) AC cable | 1 | **구매 최종안** |
+| `MSL-1C2P(중)-4mm` 3PIN / 1C2T slide switch | 2 | **구매 최종안** |
 
 ### Inventory Check
 
-- USB data cable ×2
-- maintained local switch ×2
+- USB data cable ×3 권장
+- Arduino Uno ×3 권장 — 2 use + 1 spare
+- IR proximity sensor ×2 권장 — 1 use + 1 spare
 - jumper / signal / power wire
 - breadboard / terminal / distribution parts
 - LED / NeoPixel
+- servo / motor fallback 소량
 - test object
+- multimeter / 기본 공구
 
 ### Do Not Pre-buy
 
@@ -380,7 +401,8 @@ Conveyor:
 - DRV8833 연결
 - motor supply 결정
 - IR sensor 연결
-- local stop 연결
+- MSL-1C2P local stop 연결
+- open / wire-disconnect → STOP logic 확인
 - Serial command smoke
 
 Robot Arm:
@@ -388,7 +410,8 @@ Robot Arm:
 - 5V 5A external servo power 구성
 - common GND 확인
 - Arduino control
-- local stop 연결
+- MSL-1C2P local stop 연결
+- non-blocking / incremental motion stop 확인
 - HOME / joint / claw / STOP 구현
 - Serial command smoke
 
@@ -411,7 +434,8 @@ Robot Arm:
 - [ ] DRV8833으로 30초 이상 안정적으로 운전한다.
 - [ ] belt 이탈/심한 slip이 없다.
 - [ ] IR object sensor가 반복 감지된다.
-- [ ] local stop이 Agent/MCP와 독립적으로 동작한다.
+- [ ] local stop input이 Pi/MCP 없이 Arduino에서 직접 동작한다.
+- [ ] local stop 또는 input wire open 시 motor output이 disable된다.
 - [ ] USB Serial command / response smoke가 통과한다.
 - [ ] `HALT` 후 실제 물리 정지가 확인된다.
 
@@ -423,7 +447,9 @@ Robot Arm:
 - [ ] safe angle 범위를 실측했다.
 - [ ] 구조 간섭 없이 HOME이 가능하다.
 - [ ] 저하중 pick/place 또는 sorting을 반복할 수 있다.
-- [ ] local stop / `STOP` 또는 safe pose 동작이 확인된다.
+- [ ] local stop input이 Pi/MCP 없이 Arduino에서 직접 동작한다.
+- [ ] motion 중 local stop을 넣으면 다음 trajectory step이 중단된다.
+- [ ] local stop input wire open을 STOP으로 해석한다.
 - [ ] USB Serial command / response smoke가 통과한다.
 
 ### Edge Gateway
@@ -476,7 +502,7 @@ Registry data
 | Conveyor motor supply | motor 사양과 kit 구성 확인 후 결정 |
 | Robot Arm 실제 servo 모델 | servo label 확인 |
 | Robot joint safe angle / HOME pose | 저속 sweep / 물리 간섭 실측 |
-| local stop switch의 실제 접점 형식 | continuity test |
+| MSL-1C2P 실제 COM/throw pin mapping과 lever 방향 | continuity test |
 | USB data cable / 배선 재고 | 현물 확인 |
 
 다음 항목은 더 이상 미확정이 아니다.
@@ -489,6 +515,7 @@ Robot Arm          = 이엘사이언스 Arduino 집게 로봇팔 4관절
 Servo PSU          = regulated 5V 5A external adapter
 PSU connector      = DC 5.5×2.1 + VLT-DC001
 AC cable           = C7 figure-8 cable
+Local stop         = MSL-1C2P 3PIN / 1C2T slide switch ×2
 Edge Gateway       = Raspberry Pi 3B+
 Device controller  = Arduino Uno ×2
 ```
