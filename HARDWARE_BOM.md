@@ -1,7 +1,7 @@
 # Factory Agent Hub — Hardware BOM
 
 > 상태: **2026-09-13 BOM v3 / local stop 구매안 반영**  
-> 기준: `HARDWARE_SPEC.md` v4의 Conveyor + Arduino 4-DOF Robot Arm + Raspberry Pi 3B+ 구성  
+> 기준: `HARDWARE_SPEC.md` v5의 Conveyor + Arduino 4-DOF Robot Arm + Raspberry Pi 3B+ 구성  
 > 목적: **kit 자체 구성, 별도 구매 전자부품, 보유 재고, 수령 후 조건부 항목을 분리**해 불필요한 선구매를 막는다.
 
 ---
