@@ -1,5 +1,7 @@
 # Proposal Review
 
+> **Historical review snapshot:** 이 문서는 당시 `PROJECT_PROPOSAL.md`를 기준으로 수행한 독립 리뷰 기록이다. 이후 Proposal과 하드웨어 계획이 갱신되었으므로, 현재 상태와 실행 기준은 루트 `README.md`, `PROJECT_PROPOSAL.md`, `HARDWARE_SPEC.md`를 따른다.
+
 ## Verdict
 
 INVESTIGATE
@@ -9,7 +11,7 @@ INVESTIGATE
 
 ## Review Basis
 
-- 검토 대상: 현재 `PROJECT_PROPOSAL.md` 전체.
+- 검토 대상: 당시 `PROJECT_PROPOSAL.md` 전체.
 - 검토본 SHA256: `3838fdedf78ef29574fcda86fc370f5e98cc5c4de268ed70ea72f1f498ed89ad`.
 - 기준: 사용자 요청의 고정 15개 항목, `AGENTS.md`, 최우선 기획 기준인 `knowledge/planning-review.md`의 ICP/JTBD·과거 행동 증거·증거/중복/비용 Build Gate·핵심 기능 축소 원칙. 기술 경계는 `knowledge/agent-engineering.md`의 Workflow/Agent·계약·부작용·MCP 원칙에 대조했다.
 - 이전 round 리뷰와 Writer의 의도·설명은 읽거나 평가 근거로 사용하지 않았다. 이 리뷰에서 고객 인터뷰, 시장 조사, 코드 실행 또는 장비 시험을 수행하지 않았다.
