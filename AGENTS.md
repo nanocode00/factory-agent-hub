@@ -5,11 +5,30 @@
 
 ## 1. Authoritative documents
 
+### 공개 진입점 / 현재 상태
+
+- `README.md`
+  - 외부 사람이 프로젝트를 처음 볼 때의 진입점이다.
+  - 현재 상태, 핵심 가설, 시스템 구조, 최신 하드웨어, 문서 지도를 요약한다.
+
 ### 제품 기획 원본
 
 - `PROJECT_PROPOSAL.md`
-  - 현재 프로젝트의 제품 목표, 사용자, MVP, 데모 시나리오를 정의한다.
+  - 현재 프로젝트의 제품 목표, 사용자, MVP, Build Gate, 안전 경계를 정의한다.
   - 사용자가 명시적으로 수정하라고 요청하기 전에는 임의로 제품 방향을 변경하지 않는다.
+  - 과거 하드웨어 후보 이름이 남아 있더라도 **현재 구매/구현 하드웨어를 결정하는 문서로 사용하지 않는다.**
+
+### 현재 하드웨어 / 실행 source of truth
+
+- `HARDWARE_SPEC.md`
+  - 현재 테스트베드의 기구, controller, power, sensor, protocol 초안과 Hardware Gate를 정의한다.
+  - 하드웨어 후보가 `PROJECT_PROPOSAL.md`의 과거 검토 내용과 다르면 **이 문서를 우선**한다.
+- `HARDWARE_BOM.md`
+  - 실제 구매품, 보유품, 조건부 BOM, 가격과 구매 상태를 정의한다.
+- `HARDWARE_PACKING_LIST.md`
+  - 보유 부품 중 실제 작업 장소로 가져갈 수량과 spare/fallback을 정의한다.
+- `IMPLEMENTATION_PLAN.md`
+  - 위 최신 하드웨어를 전제로 한 2주 실행 순서, Gate, freeze, demo 계획을 정의한다.
 
 ### 기획 검토 기준
 
@@ -146,9 +165,10 @@ GO | INVESTIGATE | HOLD
 ## 입력 우선순위
 
 1. 사용자의 현재 명시적 요청
-2. `PROJECT_PROPOSAL.md`
-3. 승인된 최신 review/decision 문서가 있다면 그 결정
-4. `knowledge/agent-engineering.md`
+2. `PROJECT_PROPOSAL.md`의 제품 목표 / Build Gate
+3. `HARDWARE_SPEC.md` / `HARDWARE_BOM.md` / `IMPLEMENTATION_PLAN.md`의 최신 구현 결정
+4. 승인된 최신 review/decision 문서가 있다면 그 결정
+5. `knowledge/agent-engineering.md`
 
 기획과 기술 기준이 충돌하면 임의로 제품 목표를 바꾸지 말고 충돌을 보고한다.
 
