@@ -1,7 +1,7 @@
 # Factory Agent Hub — 2주 구현 계획안
 
 > 상태: **2026-09-13 실행안 v3 / local stop 구매안 반영**  
-> 전제: `HARDWARE_SPEC.md` v4와 `HARDWARE_BOM.md` v3의 **리브온 Conveyor + 이엘사이언스 Arduino 4-DOF Robot Arm + Raspberry Pi 3B+** 구성을 사용한다.
+> 전제: `HARDWARE_SPEC.md` v5와 `HARDWARE_BOM.md` v3의 **리브온 Conveyor + 이엘사이언스 Arduino 4-DOF Robot Arm + Raspberry Pi 3B+** 구성을 사용한다.
 >
 > 목표는 멋진 로봇을 만드는 것이 아니라 **서로 다른 실제 장비 2개를 고정된 Serial Adapter와 선언적 DeviceSpec으로 등록하고, 같은 MCP 경계에서 발견·승인·실행할 수 있음을 검증하는 것**이다.
 
