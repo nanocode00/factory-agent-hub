@@ -1,7 +1,7 @@
 # Factory Agent Hub — 2주 구현 계획안
 
-> 상태: **2026-09-12 실행 초안 v1**  
-> 전제: `HARDWARE_SPEC.md` v2의 저가 Conveyor kit + G56 4-DOF Robot Arm + Raspberry Pi 3B+ 구성을 사용한다.
+> 상태: **2026-09-13 실행안 v2 / 최종 하드웨어 반영**  
+> 전제: `HARDWARE_SPEC.md` v4의 **리브온 Conveyor + 이엘사이언스 Arduino 4-DOF Robot Arm + Raspberry Pi 3B+** 구성을 사용한다.
 >
 > 목표는 멋진 로봇을 만드는 것이 아니라 **서로 다른 실제 장비 2개를 고정된 Serial Adapter와 선언적 DeviceSpec으로 등록하고, 같은 MCP 경계에서 발견·승인·실행할 수 있음을 검증하는 것**이다.
 
@@ -42,16 +42,27 @@
 
 ## 3. Day 0 — 구매 / 준비
 
-### Hardware
+### Hardware Purchase
 
-- [ ] Conveyor kit 정확한 SKU 확정 및 주문
-- [ ] G56 4-DOF kit 구성품/servo 포함 여부 확인 후 주문
-- [ ] Raspberry Pi 3B+ / 전원 / microSD / network 준비
+최종 구매안은 `HARDWARE_BOM.md`를 따른다.
+
+- [ ] 리브온 목재 Conveyor kit 주문
+- [ ] 이엘사이언스 Arduino 집게 로봇팔 4관절 주문
+- [ ] DRV8833 `VLT-MD012` 주문
+- [ ] 5V 5A regulated adapter 주문
+- [ ] C7 AC cable 주문
+- [ ] VLT-DC001 5.5×2.1 terminal connector 주문
+
+### Inventory Check
+
+- [ ] Raspberry Pi 3B+ / 기존 전원 / microSD / network 준비
 - [ ] Arduino Uno 2대 선별
-- [ ] USB cable 2개 이상 준비
-- [ ] IR 또는 HC-SR04 sensor 준비
-- [ ] local stop용 switch 준비
-- [ ] 별도 servo 전원 필요 시 보유품 선별
+- [ ] USB **data** cable 2개 이상 확인
+- [ ] IR proximity sensor 준비
+- [ ] maintained local stop switch 2개 후보 선별
+- [ ] LED / NeoPixel 준비
+- [ ] jumper / signal / power wire 확인
+- [ ] test object 준비
 
 ### Software
 
@@ -70,16 +81,18 @@
 
 목표: Agent 없이 단독으로 안정 동작.
 
-- kit 조립
-- belt/roller/frame 상태 확인
-- 기본 motor 전압과 구동 방식 확인
-- 기본 motor 유지 여부 결정
-- 필요하면 보유 28BYJ-48 또는 DC motor로 교체
-- object sensor 1개 연결
-- local stop 연결
-- LED state indication 연결
+1. kit 조립
+2. belt / roller / frame 상태 확인
+3. motor label / 기본 power 구성 확인
+4. 실제 motor supply 결정
+5. DRV8833 연결
+6. 30초 이상 연속 구동 smoke
+7. IR object sensor 연결
+8. local stop 연결
+9. LED state indication 연결
+10. Arduino Serial command 구현
 
-초기 protocol 후보:
+초기 protocol:
 
 ```text
 RUN
@@ -89,17 +102,23 @@ OBJECT?
 STATUS?
 ```
 
+기본 motor는 우선 유지한다. DRV8833 조합에서 제어 불가, 토크 부족, 비정상 과열, 지나친 속도, 기구 문제가 확인될 때만 보유 motor로 교체한다.
+
 ### Robot Arm
 
-- G56 조립
-- 각 servo center 맞춤
-- 각 joint를 아주 좁은 범위부터 sweep
-- 물리 간섭 지점 측정
-- HOME pose 정의
-- gripper open/close 정의
-- safe angle table 작성
+1. 이엘사이언스 4-DOF kit 조립
+2. 실제 servo model label 기록
+3. 5V 5A external servo PSU 구성
+4. Arduino와 servo PSU common GND 확인
+5. 각 servo center 맞춤
+6. 각 joint를 아주 좁은 범위부터 sweep
+7. 물리 간섭 지점 측정
+8. HOME pose 정의
+9. gripper open/close 정의
+10. local stop 연결
+11. Serial command 구현
 
-초기 protocol 후보:
+초기 protocol:
 
 ```text
 HOME
@@ -114,21 +133,21 @@ STOP
 
 - [ ] Conveyor 30초 이상 연속 구동
 - [ ] HALT 시 실제 정지
-- [ ] object sensor 반복 감지
+- [ ] IR sensor 반복 감지
 - [ ] Robot 모든 축 개별 동작
+- [ ] 5V 5A external servo power 안정
 - [ ] HOME 성공
 - [ ] 가벼운 물체 pick/place 3회 이상 성공
+- [ ] 두 장비 모두 local stop 확인
 - [ ] 두 장비 모두 USB Serial request/response 성공
 
-실패하면 Agent 개발보다 hardware 안정화를 우선한다. Day 2에 Hardware Gate가 닫히지 않으면 자유도·sensor 수·동작 범위를 줄인다.
+실패하면 Agent 개발보다 hardware 안정화를 우선한다. Day 2에 Hardware Gate가 닫히지 않으면 Robot 노출 joint 수, sensor 수, 동작 범위를 줄인다.
 
 ---
 
 ## 5. Day 3 — Protocol / Firmware Freeze 준비
 
 두 장비의 protocol은 일부러 같게 만들지 않는다.
-
-예:
 
 ```text
 Conveyor
@@ -227,8 +246,6 @@ latency
 
 DeviceSpec / Capability Spec 최소 계약을 확정한다.
 
-예상 필드:
-
 ```text
 device
   id
@@ -324,8 +341,6 @@ Operator Agent system prompt/examples
 
 Operator가 직접 raw command를 생성하지 않고 machine-readable PlanSpec을 만든다.
 
-예:
-
 ```text
 PlanSpec
   steps:
@@ -334,7 +349,7 @@ PlanSpec
       expected_state
 ```
 
-짧은 demo flow 예:
+짧은 demo flow:
 
 ```text
 1. Conveyor RUN
@@ -370,7 +385,7 @@ MVP에서는 자유로운 event loop보다 **짧은 유한 순서**로 제한한
 - spec version 변경 후 old approval 재사용
 - local stop 작동
 
-특히 write timeout은:
+write timeout은:
 
 ```text
 result = UNKNOWN
@@ -480,9 +495,7 @@ no-code onboarding evidence
 
 ## 15. 다음 즉시 행동
 
-현재 바로 할 일은 다음 순서다.
-
-1. Conveyor kit / G56 주문 확정
+1. 최종 구매안 결제
 2. 팀원별 역할 확정
 3. repo에 firmware / edge / agent 작업 skeleton 생성
 4. hardware 도착 전 Serial protocol과 DeviceSpec schema 초안 작성
