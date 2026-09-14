@@ -23,3 +23,5 @@ jobs:
           git add PROJECT2_ALIGNMENT.md REQUIREMENTS_CHECKLIST.md README.md
           git commit -m 'docs: align project docs with verified domain evidence'
           git push
+
+# temporary workflow; delete after successful patch
