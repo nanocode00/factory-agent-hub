@@ -1,0 +1,135 @@
+name: Capture Project2 requirements
+
+on:
+  push:
+    paths:
+      - '.github/workflows/capture-project2-requirements.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install parser dependencies
+        run: python -m pip install --quiet requests beautifulsoup4 markdownify
+
+      - name: Fetch official page and linked PDF
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf requirements
+          mkdir -p requirements
+          python - <<'PY'
+          from pathlib import Path
+          from urllib.parse import urljoin, urlparse, unquote
+          import re
+          import requests
+          from bs4 import BeautifulSoup
+          from markdownify import markdownify as md
+
+          page_url = 'https://checkpoint.habix.ai/aihuman-7th/project2'
+          headers = {
+              'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/152 Safari/537.36',
+              'Accept-Language': 'ko-KR,ko;q=0.9,en;q=0.8',
+          }
+
+          session = requests.Session()
+          r = session.get(page_url, headers=headers, timeout=30)
+          r.raise_for_status()
+          html = r.text
+          if len(html) < 500:
+              raise RuntimeError(f'Project page response unexpectedly short: {len(html)} bytes')
+
+          soup = BeautifulSoup(html, 'html.parser')
+
+          # Find the official PDF from actual page links first, then raw HTML as fallback.
+          pdf_candidates = []
+          for a in soup.find_all('a', href=True):
+              href = urljoin(page_url, a['href'])
+              label = ' '.join(a.stripped_strings)
+              low = href.lower()
+              if '.pdf' in low or '/downloads/' in low or 'pdf' in label.lower():
+                  pdf_candidates.append((href, label))
+
+          for m in re.findall(r'https?://[^\"\'<>\\s]+?\.pdf(?:\?[^\"\'<>\\s]*)?', html, flags=re.I):
+              pdf_candidates.append((m, 'html-regex'))
+          for m in re.findall(r'[/][^\"\'<>\\s]+?\.pdf(?:\?[^\"\'<>\\s]*)?', html, flags=re.I):
+              pdf_candidates.append((urljoin(page_url, m), 'html-regex-relative'))
+
+          # Deduplicate while preserving order; prefer links whose labels/URLs look like the project guide.
+          seen = set()
+          pdf_candidates = [(u, l) for u, l in pdf_candidates if not (u in seen or seen.add(u))]
+          pdf_candidates.sort(key=lambda x: (('가이드' not in x[1] and 'guide' not in x[0].lower()), ('project' not in x[0].lower() and '프로젝트' not in unquote(x[0]))))
+
+          pdf_bytes = None
+          pdf_url = None
+          attempts = []
+          for candidate, label in pdf_candidates:
+              try:
+                  pr = session.get(candidate, headers=headers, timeout=45, allow_redirects=True)
+                  attempts.append((candidate, pr.status_code, pr.headers.get('content-type',''), len(pr.content)))
+                  if pr.ok and pr.content.startswith(b'%PDF'):
+                      pdf_bytes = pr.content
+                      pdf_url = pr.url
+                      break
+              except Exception as e:
+                  attempts.append((candidate, 'ERROR', type(e).__name__, 0))
+
+          if pdf_bytes is None:
+              raise RuntimeError('No valid PDF could be downloaded from page links. Candidates/attempts: ' + repr(attempts))
+
+          Path('requirements/project2-guide-v3.pdf').write_bytes(pdf_bytes)
+
+          # Produce a faithful, readable Markdown capture of the web page itself.
+          # Prefer the page's main/article region; remove chrome and scripts.
+          main = soup.find('main') or soup.find('article') or soup.find(attrs={'role': 'main'}) or soup.body or soup
+          for tag in main.find_all(['script', 'style', 'noscript', 'svg', 'nav', 'footer', 'header']):
+              tag.decompose()
+
+          page_md = md(str(main), heading_style='ATX', bullets='-')
+          page_md = re.sub(r'\n[ \t]+\n', '\n\n', page_md)
+          page_md = re.sub(r'\n{3,}', '\n\n', page_md).strip()
+
+          # Remove obvious empty UI fragments while preserving requirements content.
+          lines = []
+          for line in page_md.splitlines():
+              s = line.strip()
+              if s in {'', '[Button]', 'Menu'}:
+                  lines.append(line)
+                  continue
+              lines.append(line.rstrip())
+          page_md = '\n'.join(lines).strip()
+
+          title = soup.title.get_text(' ', strip=True) if soup.title else 'AI Human 7th Project2'
+          front = f'''# AI Human 7th — Project2 요구사항\n\n> 원문 웹페이지를 2026-09-14 기준으로 Markdown 형태로 보관한 문서입니다.\n>\n> - Source: {page_url}\n> - Linked guide PDF: {pdf_url}\n> - Page title: {title}\n> - 목적: 프로젝트 구현 중 요구사항 누락을 막기 위한 저장소 내 기준 문서\n\n---\n\n'''
+          Path('requirements/project2-webpage.md').write_text(front + page_md + '\n', encoding='utf-8')
+
+          print('page bytes:', len(html.encode('utf-8')))
+          print('markdown chars:', len(page_md))
+          print('pdf url:', pdf_url)
+          print('pdf bytes:', len(pdf_bytes))
+          PY
+
+      - name: Verify exactly two requirement files
+        run: |
+          set -euo pipefail
+          test "$(find requirements -maxdepth 1 -type f | wc -l)" -eq 2
+          test -s requirements/project2-webpage.md
+          test -s requirements/project2-guide-v3.pdf
+          head -c 4 requirements/project2-guide-v3.pdf | grep -q '%PDF'
+          find requirements -maxdepth 1 -type f -printf '%f %s bytes\n'
+
+      - name: Commit captured requirements
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add requirements/project2-webpage.md requirements/project2-guide-v3.pdf
+          git commit -m 'docs: archive official project2 requirements'
+          git push
