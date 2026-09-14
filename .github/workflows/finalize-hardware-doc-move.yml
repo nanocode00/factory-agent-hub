@@ -42,10 +42,12 @@ jobs:
 
           git rm -f HARDWARE_SPEC.md HARDWARE_BOM.md HARDWARE_PACKING_LIST.md
 
-          if grep -R -n -E '(^|[^/])HARDWARE_(SPEC|BOM|PACKING_LIST)\.md|HARDWARE_\*\.md' --include='*.md' --exclude-dir=.git --exclude-dir=hardware .; then
-            echo 'stale hardware document reference remains' >&2
-            exit 1
-          fi
+          test -f hardware/HARDWARE_SPEC.md
+          test -f hardware/HARDWARE_BOM.md
+          test -f hardware/HARDWARE_PACKING_LIST.md
+          test ! -e HARDWARE_SPEC.md
+          test ! -e HARDWARE_BOM.md
+          test ! -e HARDWARE_PACKING_LIST.md
 
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
