@@ -1,37 +1,54 @@
 # Factory Agent Hub
 
-> **자연어로 설명한 새 설비를 검증 가능한 DeviceSpec / Capability Spec으로 변환하고, 사람 검토·실장비 테스트 후 Registry에 등록하여 기존 장비와 함께 발견·실행하는 Agent Platform 실험 프로젝트**
+> **자연어로 설명한 새 설비를 검증 가능한 DeviceSpec / Capability Spec으로 변환하고, 사람 검토·실장비 테스트 후 Registry에 등록하여 기존 장비와 함께 발견·실행하는 Vertical Agent 실험 프로젝트**
 
-현재 단계는 **검증 준비 / 하드웨어 구매·bring-up 직전**이다. 문서 구조와 테스트베드 계획은 구현 가능한 수준까지 정리되었지만, 고객 Pain·순절감·실장비 성공 결과는 아직 관측되지 않았다. 따라서 **제품 판정은 `INVESTIGATE`를 유지하고, 증거 수집을 위한 기술 검증 prototype은 `PROCEED`한다.**
+현재 단계는 **AI Human 7th Project2 사전기획(2026-09-14~09-17) + 하드웨어 검증 준비**다. 기존 기술 가설과 테스트베드는 유지하지만, 새로 공개된 Project2 기준에 맞춰 **Vercel UI, Cloud Run/FastAPI, LLM output contract, Skill, Streamable HTTP MCP, Docker, Langfuse 3축, 30+ Evals**를 필수 범위로 반영했다.
+
+> **중요 Gate:** Project2는 팀원이 해당 사용자·업무 흐름·예외 상황을 **3개월 이상 직접 경험한 버티컬 도메인**이어야 한다. 이 조건을 구체적인 경험과 산출물로 증명하지 못하면 Factory Agent Hub를 최종 주제로 확정하지 않는다.
+
+자세한 정렬 기준은 [`PROJECT2_ALIGNMENT.md`](./PROJECT2_ALIGNMENT.md), 9/14~17 사전기획은 [`PREPLANNING.md`](./PREPLANNING.md)를 따른다.
 
 ## What this project is testing
 
 Factory Agent Hub의 핵심 질문은 단순히 “AI로 로봇팔과 컨베이어를 움직일 수 있는가?”가 아니다.
 
-> **이미 지원되는 Serial Adapter와 고정된 장비 protocol 안에서, 플랫폼 코드를 수정하지 않고 새 장비를 자연어 설명 → 검증 → 제한 시험 → 등록의 흐름으로 온보딩하고, 기존 Operator가 다시 발견해 함께 사용할 수 있는가?**
+> **이미 지원되는 Serial Adapter와 고정된 장비 protocol 안에서, 플랫폼 코드를 수정하지 않고 새 장비를 자연어 설명 → 구조화 → 검증 → 사람 승인 → 제한 시험 → 등록의 흐름으로 온보딩하고, 기존 Operator가 MCP를 통해 다시 발견해 함께 사용할 수 있는가?**
 
 핵심 경계는 다음과 같다.
 
 - 자연어를 임의 Python/Shell/PLC 코드로 바로 실행하지 않는다.
-- 자연어 → 선언적 DeviceSpec / Capability Spec → 결정적 validation → 사람 검토 → 제한된 Device Test → Registry 순서로 진행한다.
+- 자연어 → Pydantic output contract → DeviceSpec / Capability Spec → 결정적 validation → 사람 검토 → 제한된 Device Test → Registry 순서로 진행한다.
 - 실제 장비 쓰기 동작은 approval, argument/range validation, timeout, audit log를 코드에서 강제한다.
 - 장비 실시간 제어와 local stop은 Arduino 등 로컬 제어기가 담당한다.
-- MCP는 장비 기능 discovery/invoke 경계이며 안전 검증을 대신하지 않는다.
+- Skill은 도메인 판단 기준을 제공하고, MCP는 도메인 데이터·행동을 제공한다.
+- `/api/agent`와 `/mcp`는 역할을 분리한다.
+- “잘 된다”가 아니라 같은 평가셋에서 계약 준수율·실패 경로·지연·토큰·비용을 재측정한다.
 
-## Current architecture
+## Project2 delivery architecture
 
 ```text
-Laptop
-  Setup Agent / Operator Agent / LLM / Langfuse
-        │
-        │ Wi-Fi / Ethernet · Streamable HTTP
-        ▼
-Raspberry Pi 3B+
-  Factory Edge Gateway
-  ├─ MCP Server
+User
+  │
+  ▼
+Vercel / Next.js
+  │ HTTPS
+  ▼
+Cloud Run / FastAPI
+  ├─ GET  /health
+  ├─ POST /api/agent
+  ├─ /mcp  (Streamable HTTP)
+  ├─ Setup / Operator Agent Service
+  ├─ Pydantic contracts / validation / retry
+  ├─ Skill
+  ├─ Langfuse tracing / prompt management / evals
+  │
+  └─ authenticated Edge client
+       │
+       ▼
+Raspberry Pi 3B+ Edge Gateway
   ├─ Device Registry
-  ├─ Validator / Policy
-  ├─ Deterministic Executor
+  ├─ Policy / Deterministic Executor
+  ├─ Serial Adapter
   ├─ SQLite / Audit Log
   │
   ├─ USB Serial → Arduino #1 → DRV8833 → Conveyor
@@ -43,9 +60,27 @@ Raspberry Pi 3B+
                               └─ local stop
 ```
 
+Cloud Run은 USB Serial에 직접 접근할 수 없으므로 physical device execution은 Raspberry Pi Edge Gateway가 담당한다. Cloud Run에서 Pi에 접근할 때는 인증된 HTTPS edge endpoint/tunnel을 사용하고, 임의 raw shell/serial API는 열지 않는다.
+
+## Required Project2 evidence
+
+최종 제출에서 최소 다음을 증거로 남긴다.
+
+| 층 | 역할 | 증거 |
+|---|---|---|
+| Vercel / Next.js | 실제 사용자 입력·결과·실패 안내 | Vercel URL + 정상/실패 사용자 흐름 |
+| Cloud Run / FastAPI | Agent 실행 + output contract + validation/retry | Cloud Run URL + `GET /health` + `POST /api/agent` |
+| MCP Server | 도메인 데이터/행동 tool 제공 | `/mcp` 연결 방법 + tool 목록 + 실제 호출 결과 |
+| Docker | 재현 가능한 실행 | Dockerfile + `docker compose up` |
+| Skill | 도메인 규칙·판단·예외 처리 | `SKILL.md` |
+| Langfuse | trace → prompt version → 같은 eval 재측정 | trace + prompt v1/v2 + `EVAL_REPORT.md` |
+| Evals | 30건 이상 회귀 측정 | Dataset + rubric + 변경 전후 score |
+| Repo hygiene | 재현/보안 | `.env.example`, secret 미커밋, README |
+| Intro page | 서비스 소개 | 별도 소개 페이지 URL |
+
 ## Current hardware testbed
 
-2026-09-13 기준 최종 구매안은 다음과 같다.
+2026-09-13 기준 구매안은 다음과 같다.
 
 | 구분 | 선택 |
 |---|---|
@@ -66,7 +101,7 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 
 ## Validation status
 
-현재 독립 기획 리뷰의 최종 판정은 **INVESTIGATE**다. 이는 제품 가치 판정이며, 현재 기술 prototype 구현 중단을 의미하지 않는다.
+현재 독립 기획 리뷰의 제품 판정은 **INVESTIGATE**다. 이는 제품 가치 판정이며, 기술 prototype 구현 중단을 의미하지 않는다.
 
 문서로 준비된 것:
 
@@ -74,17 +109,22 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 - Pain 조사 Google Form / 응답 Sheet
 - 수동 DeviceSpec vs 자연어 초안 비교 활동지
 - 하드웨어 테스트베드와 구매 BOM
-- 2주 구현 계획과 Hardware Gate
-- firmware / protocol / Adapter / schema / prompt freeze 규칙
+- Hardware Gate와 freeze 규칙
 - timeout, disconnect, approval, result-unknown 등 실패 처리 원칙
-- Langfuse 기반 관측·평가 지식 정리
+- Project2 요구사항 정렬 문서
+- 9/14~17 사전기획 문서
+- `.env.example`
 
 아직 필요한 증거:
 
+- **3개월 이상 도메인 직접 경험 Gate**
 - 최근 실제 장비 통합 Pain과 반복 사례
 - 자연어 방식의 총 작업시간 절감 여부
 - 두 실제 장비의 단독 smoke와 Serial 안정성
 - 동일 Serial Adapter / DeviceSpec 계약으로 두 장비를 표현 가능한지
+- Vercel / Cloud Run / `/mcp` 실제 배포
+- Pydantic contract validation / retry 결과
+- Langfuse trace, Prompt Management v1→v2, 30+ Dataset 재측정
 - freeze 이후 코드 수정 없는 신규 장비 온보딩 성공 여부
 
 ## Demo target
@@ -97,11 +137,13 @@ Registry = Conveyor only
 
 Freeze platform + firmware + protocols
 
-Natural-language Robot Arm description
-→ Setup Agent draft
+User → Vercel
+→ POST /api/agent
+→ Setup Agent structured output
+→ DeviceSpec draft
 → structural / semantic / safety validation
 → human review
-→ limited physical test
+→ limited physical test via Edge Gateway
 → active Registry
 
 After
@@ -116,16 +158,35 @@ Same Operator / Same MCP / Same Adapter
 
 예시 상위 시나리오는 `물체 감지 → Conveyor HALT → Robot pick/place → 상태 확인 → Conveyor 재가동`이다.
 
+## Evaluation target
+
+평가셋은 9/23 전 **30건 이상**으로 확정하고 변경 전후 같은 Dataset을 다시 측정한다.
+
+초기 분포 후보:
+
+- 정상 Setup
+- 필수 정보 누락 / 모호함
+- 타입·범위 오류
+- command injection 성격 입력
+- 미지원 protocol / capability
+- unverified / approval 오류
+- 정상 Operator Plan
+- timeout / disconnect / result-unknown 판단
+
+주요 지표는 output contract pass rate, unsafe action rejection, unsupported request rejection, plan validity, tool-call correctness, latency, tokens, cost다.
+
 ## Repository guide
 
 | 문서 | 역할 |
 |---|---|
+| [`PROJECT2_ALIGNMENT.md`](./PROJECT2_ALIGNMENT.md) | **Project2 필수 조건, 배포 구조, 일정, Evals 정렬 source of truth** |
+| [`PREPLANNING.md`](./PREPLANNING.md) | **9/14~17 개인 사전기획: 후보 3개 / 경험 Gate / 평가 입력 후보** |
 | [`PROJECT_PROPOSAL.md`](./PROJECT_PROPOSAL.md) | 제품 가설, ICP/JTBD, Build Gate, prototype 진행 상태, MVP, 안전 경계 |
 | [`reviews/proposal-review.md`](./reviews/proposal-review.md) | 독립 기획 리뷰 snapshot과 `INVESTIGATE` 판정 |
 | [`HARDWARE_SPEC.md`](./HARDWARE_SPEC.md) | **현재 하드웨어 source of truth** |
 | [`HARDWARE_BOM.md`](./HARDWARE_BOM.md) | 구매품 / 보유품 / 조건부 BOM / 현재 비용 |
 | [`HARDWARE_PACKING_LIST.md`](./HARDWARE_PACKING_LIST.md) | 집에서 작업 장소로 가져갈 실제 부품 체크리스트 |
-| [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) | 2주 구현 순서, Gate, freeze, demo 계획 |
+| [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) | 하드웨어/Edge 중심 상세 WBS |
 | [`knowledge/agent-engineering.md`](./knowledge/agent-engineering.md) | Agent / MCP / validation / retry / Langfuse 구현 지식 |
 | [`knowledge/planning-review.md`](./knowledge/planning-review.md) | ICP / JTBD / evidence / Build Gate 기획 기준 |
 | [`AGENTS.md`](./AGENTS.md) | 이 저장소에서 Agent/Codex가 따라야 할 작업 규칙 |
@@ -133,18 +194,19 @@ Same Operator / Same MCP / Same Adapter
 
 ## Immediate next steps
 
-1. 최종 하드웨어 주문
-2. 집에서 가져갈 부품을 `HARDWARE_PACKING_LIST.md` 기준으로 선별
-3. 배송 대기 중 DeviceSpec schema / Serial Adapter / Registry / MCP skeleton 선행 구현
-4. 수령 후 각 장비를 Agent 없이 단독 bring-up
-5. Hardware Gate 통과 후 두 firmware / protocol과 플랫폼 경계를 freeze
-6. Setup Agent onboarding / Operator 조합 실행 / 실패 회귀 테스트
-7. 준비된 A/B 활동지와 Pain 조사로 제품 가치 증거 수집
+1. `PREPLANNING.md`의 **3개월 경험 Gate**를 먼저 채운다.
+2. 9/17까지 개인 문제 후보 3개와 후보별 사용자/대안/평가 입력 10건을 준비한다.
+3. 이 아이디어가 Gate를 통과하면 9/23까지 API/output/Skill/MCP/관측 계약과 30건 평가셋을 freeze한다.
+4. 하드웨어 수령 후 각 장비를 Agent 없이 단독 bring-up한다.
+5. 동시에 Vercel / FastAPI / Docker / Langfuse skeleton을 만든다.
+6. Cloud Run ↔ Raspberry Pi edge 연결을 작은 smoke로 먼저 검증한다.
+7. 실패 observation을 근거로 Prompt v1→v2를 바꾸고 같은 Dataset을 재측정한다.
+8. 10/8 자정에 코드 동결하고 10/9~11은 발표 자료만 만든다.
 
 ## Scope
 
-이번 MVP는 **Serial Adapter 1개 + 서로 다른 실제 장비 2개 + 검증 가능한 declarative contract**에 집중한다. Dynamic MCP Tool, PLC 대체, 임의 프로토콜 발명, 복잡한 multi-agent, vision, digital twin, 무인 생산라인 운영은 범위 밖이다.
+이번 MVP는 **Serial Adapter 1개 + 서로 다른 실제 장비 2개 + 검증 가능한 declarative contract + Project2 운영 증거**에 집중한다. Dynamic MCP Tool, PLC 대체, 임의 프로토콜 발명, 복잡한 multi-agent, vision, digital twin, 무인 생산라인 운영은 범위 밖이다.
 
 ---
 
-**Current status:** `PRODUCT = INVESTIGATE / TECHNICAL VALIDATION PROTOTYPE = PROCEED`
+**Current status:** `PROJECT2 PRE-PLANNING / PRODUCT = INVESTIGATE / TECHNICAL VALIDATION PROTOTYPE = PROCEED`
