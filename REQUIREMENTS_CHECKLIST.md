@@ -23,8 +23,8 @@
 
 | 요구사항 | 상태 | 현재 근거 | 남은 일 |
 |---|---|---|---|
-| 팀원 중 해당 버티컬 도메인을 **3개월 이상 직접 경험**한 사람이 있어야 함 | `BLOCKED` | `PREPLANNING.md`에 Gate를 만들었으나 경험자/기간/실제 사례 칸이 비어 있음 | 경험자, 기간, 실제 프로젝트/장비, 반복 업무, 예외 상황, 코드·문서·commit 근거를 기록 |
-| 실제 사용자의 반복 업무를 해결하는 주제일 것 | `PARTIAL` | `PROJECT_PROPOSAL.md`에 ICP/JTBD와 반복 통합 가설이 있음 | 실제 경험 근거로 사용자와 업무 흐름을 확정 |
+| 팀원 중 해당 버티컬 도메인을 **3개월 이상 직접 경험**한 사람이 있어야 함 | `PARTIAL` | 직접 경험 도메인을 **Embedded/IoT Device Integration**으로 좁혔고, `PREPLANNING.md`에 2024.03~2024.11 webOS 스마트 화분 프로젝트의 장비 통합 경험을 기록함 | 실제 코드/문서/commit 링크와 대표 반복 사례 2~3개를 붙여 증빙 완료 |
+| 실제 사용자의 반복 업무를 해결하는 주제일 것 | `PARTIAL` | 직접 경험한 새 센서·액추에이터·장비의 HW-SW 통합 반복 업무로 문제 범위를 좁힘 | 스마트 화분 경험의 구체 사례와 현재 대안을 2~3개 사례로 보강 |
 | 사전기획에서 개인별 문제 후보 **3개** 준비 | `PARTIAL` | `PREPLANNING.md` Candidate A 작성, B/C 비어 있음 | Candidate B/C 작성 |
 | 후보별 사용자 상황·현재 대안·범위 정리 | `PARTIAL` | Candidate A와 `PROJECT_PROPOSAL.md`에 일부 존재 | B/C 포함 동일 기준으로 정리 |
 | 9/17까지 평가셋 후보 **10건** 준비 | `PASS` for A | `PREPLANNING.md` Candidate A에 10건 존재 | 최종 주제가 A가 아닐 경우 새 후보로 다시 작성 |
@@ -32,7 +32,7 @@
 | 고객 여정 맵 / 단계별 pain point | `TODO` | 명시적 customer journey map 없음 | 최종 주제 확정 후 작성 |
 | 유사 제품/현재 대안 분석 | `PARTIAL` | 기존 script/SDK/manual spec/workflow/PLC 후보 비교가 있음 | 실제 사용 대안과 경쟁 제품을 확인해 확정 |
 
-**판정:** 현재 가장 큰 선행조건은 기술이 아니라 **3개월 직접 경험 Gate**다. 이 Gate를 못 닫으면 Factory Agent Hub를 최종 주제로 확정하지 않는다.
+**판정:** Candidate A의 3개월 기간 자체는 **Embedded/IoT Device Integration 경험으로 충족 가능**하다고 본다. 다만 평가자가 확인할 수 있도록 실제 코드/문서/commit 링크와 반복 사례를 붙이기 전까지는 `PARTIAL`로 유지한다. Factory Automation 실무 경험을 근거로 주장하지 않는다.
 
 ---
 
