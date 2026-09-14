@@ -28,3 +28,5 @@ jobs:
           git add -u PROJECT2_ALIGNMENT.md PROJECT_PROPOSAL.md PREPLANNING.md
           git commit -m 'docs: consolidate project planning into PROJECT_PLAN'
           git push
+
+# temporary workflow; delete after successful consolidation
