@@ -187,7 +187,7 @@ Same Operator / Same MCP / Same Adapter
 | [`hardware/HARDWARE_SPEC.md`](./hardware/HARDWARE_SPEC.md) | **현재 하드웨어 source of truth** |
 | [`hardware/HARDWARE_BOM.md`](./hardware/HARDWARE_BOM.md) | 구매품 / 보유품 / 조건부 BOM / 현재 비용 |
 | [`hardware/HARDWARE_PACKING_LIST.md`](./hardware/HARDWARE_PACKING_LIST.md) | 집에서 작업 장소로 가져갈 실제 부품 체크리스트 |
-| [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) | 하드웨어/Edge 중심 상세 WBS |
+| [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) | **Project2 전체 구현·배포·평가 통합 WBS / 실행 Gate** |
 | [`knowledge/agent-engineering.md`](./knowledge/agent-engineering.md) | Agent / MCP / validation / retry / Langfuse 구현 지식 |
 | [`knowledge/planning-review.md`](./knowledge/planning-review.md) | ICP / JTBD / evidence / Build Gate 기획 기준 |
 | [`AGENTS.md`](./AGENTS.md) | 이 저장소에서 Agent/Codex가 따라야 할 작업 규칙 |
@@ -196,12 +196,12 @@ Same Operator / Same MCP / Same Adapter
 ## Immediate next steps
 
 1. ~~기획 문서와 3개월 경험 근거 정리~~ → **완료: `PROJECT_PLAN.md`로 통합**
-2. 9/17까지 개인 문제 후보 3개와 후보별 사용자/대안/평가 입력 10건을 준비한다.
-3. Candidate A가 최종 선택되면 9/23까지 API/output/Skill/MCP/관측 계약과 30건 평가셋을 freeze한다.
-4. 하드웨어 수령 후 각 장비를 Agent 없이 단독 bring-up한다.
-5. 동시에 Vercel / FastAPI / Docker / Langfuse skeleton을 만든다.
-6. Cloud Run ↔ Raspberry Pi edge 연결을 작은 smoke로 먼저 검증한다.
-7. 실패 observation을 근거로 Prompt v1→v2를 바꾸고 같은 Dataset을 재측정한다.
+2. 최근 Device Integration 반복 사례 / 현재 대안과 customer journey를 보강한다.
+3. 대표 eval 10건의 expected result / rubric을 구체화하고 9/23까지 30건 Dataset으로 확장한다.
+4. API / Pydantic output / failure / Skill / MCP / observability contract를 9/23까지 freeze한다.
+5. 하드웨어 주문·수령 준비와 repo skeleton / 역할 분담을 끝낸다.
+6. 9/28부터 Vercel / FastAPI / Docker / Langfuse / MCP와 hardware bring-up을 병렬 진행한다.
+7. 10/6 baseline → 실패 분석 → 한 요소 변경 → 같은 Dataset 재측정을 수행한다.
 8. 10/8 자정에 코드 동결하고 10/9~11은 발표 자료만 만든다.
 
 ## Scope

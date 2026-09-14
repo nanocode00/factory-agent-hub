@@ -455,14 +455,14 @@ Langfuse:
 
 ## 13. 현재 우선순위
 
-1. 프로젝트 문서 중복 제거 및 source of truth 정리
-2. 최근 실제 Device Integration Pain / 현재 대안 증거 보강
-3. 30건 평가셋과 rubric 확정
-4. 두 실제 장비 단독 bring-up
-5. Serial protocol / DeviceSpec contract freeze
-6. FastAPI / Docker / Vercel / Langfuse skeleton 구현
-7. MCP + Edge 실제 통합
-8. baseline 측정 → 실패 분석 → 개선 → 재측정
+1. 최근 실제 Device Integration Pain / 현재 대안과 customer journey 증거 보강
+2. 대표 eval 10건의 expected result / rubric 구체화 후 30건 Dataset으로 확장
+3. API / Pydantic output / failure / Skill / MCP / observability contract freeze
+4. 하드웨어 주문·수령 준비와 두 실제 장비 단독 bring-up
+5. FastAPI / Docker / Vercel / Langfuse / FastMCP skeleton 구현
+6. Serial protocol / DeviceSpec / Edge execution 통합
+7. 두 모델 비교 + baseline 측정
+8. 실패 분석 → 한 요소 개선 → 같은 Dataset 재측정 → release evidence 정리
 
 ## 14. 문서 운영 원칙
 
