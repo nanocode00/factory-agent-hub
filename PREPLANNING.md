@@ -14,11 +14,11 @@ Factory, Conveyor, Robot Arm은 이 문제를 검증하기 위한 **적용 시�
 
 ### 한 문장
 
-새 센서·액추에이터·Serial 장비를 프로토타입 시스템에 반복적으로 연결하는 개발자가, 장비마다 연결 방식·명령·파라미터·상태 확인 규칙을 다시 코드에 옮기고 통합해야 하는 반복 작업을 줄이도록 돕는 Agent.
+새 센서·액추에이터·외부 장비를 프로토타입 시스템에 반복적으로 연결하는 개발자가, 장비마다 통신 방식·데이터 형식·명령·파라미터·상태 확인 규칙을 다시 코드에 옮기고 통합해야 하는 반복 작업을 줄이도록 돕는 Agent. 이번 MVP의 물리 장비 연결은 문서화된 text Serial Adapter로 제한한다.
 
 ### 사용자 상황
 
-- 새 센서, 액추에이터, 보드 또는 Serial 장비를 기존 프로토타입에 붙인다.
+- 새 센서, 액추에이터, 보드 또는 외부 장비를 기존 프로토타입에 붙인다.
 - 장비 문서나 기존 예제에서 연결 방식과 명령/데이터 규칙을 확인한다.
 - 센서 이름, 단위, 범위, 전송 주기 또는 actuator command 같은 인터페이스를 기존 시스템에 맞춘다.
 - 코드나 설정에 제어 조건과 상태 확인 규칙을 다시 옮긴다.
@@ -39,23 +39,45 @@ Factory, Conveyor, Robot Arm은 이 문제를 검증하기 위한 **적용 시�
 
 ### 3개월 경험 Gate
 
-**판정: 경험 기간 기준은 충족 가능. 증빙 링크와 구체 사례를 사전기획 종료 전 보강한다.**
+**판정: `PASS` — 공개 GitHub 기록만으로도 3개월 이상의 직접 HW-SW 통합 작업을 확인할 수 있다.**
 
-- [x] 경험자: 김재훈
-- [x] 경험 기간: **2024.03~2024.11, 약 8개월**
-- [x] 대표 프로젝트: **webOS 스마트 화분 프로젝트**
-- [x] 실제 구성: Raspberry Pi, 센서, 급수 액추에이터, UI/소프트웨어 연동
-- [x] 반복한 업무: 장비 연결, 센서 데이터 규격 정리, 제어 로직 작성, HW-SW 통합 및 테스트
-- [x] 겪은 문제 유형: 장비별 값/단위/전송 규칙 차이, 제어 조건 조율, 실제 HW와 SW 인터페이스 연동 문제
-- [x] 현재 우회 방식: 장비별 코드를 직접 작성·수정하고 인터페이스 규칙을 수동으로 맞춤
-- [ ] 코드/문서/commit 등 실제 산출물 링크: **추가 정리 필요**
-- [ ] 위 경험에서 실제로 반복되었던 통합 사례 2~3개를 짧은 사례 문장으로 정리
+- [x] 경험자: 김재훈 (`nanocode00`)
+- [x] 근거가 확인되는 직접 작업 기간: **2024-06-02 ~ 2024-09-24, 약 3개월 3주**
+- [x] 대표 프로젝트: **webOS Smart Home Gardening**
+- [x] 프로젝트 저장소: https://github.com/dudgns128/webos-gardening
+- [x] 실제 구성: Raspberry Pi 4 / webOS OSE + Arduino + DHT11 + 조도·수위·토양수분 센서 + NeoPixel + 물펌프
+- [x] 실제 통신: **Raspberry Pi(webOS) ↔ Arduino I²C**. 과거 경험을 Serial 경험으로 표현하지 않는다.
+- [x] 반복한 업무: 센서/액추에이터 연결, I²C command/data contract 작성, 센서 raw data 변환, 상위 서비스 로직 연결, 실제 HW 테스트와 timing/API 수정
+- [x] 현재 우회 방식: 장비별 통신/API 코드를 직접 작성·수정하고 상위 서비스가 기대하는 데이터·제어 인터페이스를 수동으로 맞춤
+
+#### 공개 증빙
+
+1. **I²C HW control 초기 통합 — 2024-06-02**  
+   https://github.com/dudgns128/webos-gardening/commit/a94a8fc01c9fc60d4263d4866e30fbeceb8e0a0e
+   - Arduino 측 DHT/analog sensor, NeoPixel, pump를 하나의 I²C command/data 규칙으로 구성했다.
+2. **실장비 통신 timing / parsing 수정 — 2024-06-02**  
+   https://github.com/dudgns128/webos-gardening/commit/00e4febe4ae07d85350d39854b97256db8e53eac
+   - write 후 read timing을 수정하고 10-byte sensor payload를 humidity/temperature/light/water-level/soil-moisture로 해석했다.
+3. **dummy data → 실제 HW 데이터·제어 연결 — 2024-06-12**  
+   https://github.com/dudgns128/webos-gardening/commit/f2e890aab82d9b97055d717fa665fe1ec10bfb04
+   - 기존 random sensing 값을 실제 I²C sensor read로 교체하고, 자동 광량 조절과 물주기 로직을 NeoPixel/pump 제어에 연결했다.
+4. **실장비 연동 오류를 수정해 HW 제어 완성 — 2024-06-12**  
+   https://github.com/dudgns128/webos-gardening/commit/ea08aa6a93d63a9cf5e9e7fd43b7947137a95057
+   - webOS service API의 parameter/payload 형식과 callback 처리를 실제 동작 형태에 맞춰 수정하고 제어를 다시 활성화했다.
+5. **프로젝트 후속 참여 기록 — 2024-09-24**  
+   https://github.com/dudgns128/webos-gardening/commit/5fa0831b9bac76b405b4d273a93da104a9ca450e
+
+#### 반복 사례 요약
+
+- **센서 데이터 통합:** 여러 센서의 서로 다른 raw 값을 고정된 10-byte I²C payload로 묶고 상위 webOS 서비스에서 의미 있는 값으로 다시 변환했다.
+- **액추에이터 제어 통합:** NeoPixel과 물펌프를 mode + argument 형태의 I²C 명령으로 정의하고, 기존 자동화 로직과 연결했다.
+- **실장비 디버깅:** mock/dummy 환경에서는 드러나지 않던 read timing, callback, parameter/payload 형식 문제를 실제 Raspberry Pi–Arduino 환경에서 수정했다.
 
 ### Gate 해석
 
 이번 프로젝트에서 주장하는 경험은 다음이다.
 
-> **Embedded/IoT 프로토타입에서 새 장비를 기존 시스템에 연결하고 데이터·제어 인터페이스를 맞추는 업무를 3개월 이상 직접 경험했다.**
+> **Embedded/IoT 프로토타입에서 센서·액추에이터와 외부 장비를 기존 시스템에 연결하고, 통신 규칙·데이터 변환·제어 인터페이스를 맞추는 업무를 3개월 이상 직접 경험했다. 공개 저장소에서 2024-06-02~09-24의 직접 작업 기록을 확인할 수 있다.**
 
 다음은 경험 근거로 주장하지 않는다.
 
@@ -126,7 +148,7 @@ Factory, Conveyor, Robot Arm은 이 문제를 검증하기 위한 **적용 시�
 
 | 기준 | A | B | C |
 |---|---:|---:|---:|
-| 3개월 직접 경험을 증명할 수 있음 | **가능 — 증빙 링크 보강 필요** |  |  |
+| 3개월 직접 경험을 증명할 수 있음 | **PASS — 공개 GitHub 증빙 확보** |  |  |
 | 반복 업무가 구체적임 | **예** |  |  |
 | 현재 대안/우회가 관찰됨 | **예** |  |  |
 | 30건 평가셋을 만들 수 있음 | **예상 가능** |  |  |
