@@ -1,10 +1,10 @@
 # Factory Agent Hub
 
-> **새 센서·액추에이터·Serial 장비를 프로토타입 시스템에 연결할 때 반복되는 인터페이스 통합 작업을, 검증 가능한 DeviceSpec / Capability Spec과 Agent + MCP 흐름으로 구조화하는 Vertical Agent 실험 프로젝트**
+> **새 센서·액추에이터·외부 장비를 프로토타입 시스템에 연결할 때 반복되는 인터페이스 통합 작업을, 검증 가능한 DeviceSpec / Capability Spec과 Agent + MCP 흐름으로 구조화하는 Vertical Agent 실험 프로젝트**
 
 현재 단계는 **AI Human 7th Project2 사전기획(2026-09-14~09-17) + 하드웨어 검증 준비**다. 기존 기술 가설과 테스트베드는 유지하지만, 새로 공개된 Project2 기준에 맞춰 **Vercel UI, Cloud Run/FastAPI, LLM output contract, Skill, Streamable HTTP MCP, Docker, Langfuse 3축, 30+ Evals**를 필수 범위로 반영했다.
 
-> **도메인 정의:** Project2의 3개월 직접 경험 기준은 `Factory Automation` 실무 경험으로 주장하지 않는다. 직접 경험 도메인은 **Embedded/IoT Device Integration**이며, 2024.03~2024.11 webOS 스마트 화분 프로젝트에서 Raspberry Pi·센서·급수 액추에이터·UI를 통합한 경험을 주 근거로 사용한다. Conveyor/Robot Arm은 이 문제를 검증하는 physical testbed다. 구체 사례와 산출물 링크는 사전기획 단계에서 보강한다.
+> **3개월 경험 Gate: PASS.** 직접 경험 도메인은 **Embedded/IoT Device Integration**이다. `dudgns128/webos-gardening` 공개 기록에서 김재훈(`nanocode00`)의 2024-06-02~09-24 I²C 기반 센서·액추에이터 HW-SW 통합 작업을 확인했다. Factory는 적용 시나리오이며 제조 현장 경험을 주장하지 않는다. 이번 MVP의 text Serial Adapter는 동일한 Device Integration 문제를 검증하기 위한 구현 선택이다.
 
 자세한 정렬 기준은 [`PROJECT2_ALIGNMENT.md`](./PROJECT2_ALIGNMENT.md), 9/14~17 사전기획은 [`PREPLANNING.md`](./PREPLANNING.md)를 따른다.
 
@@ -106,7 +106,7 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 문서로 준비된 것:
 
 - Embedded/IoT Device Integration으로 좁힌 직접 경험 도메인 정의
-- 2024.03~2024.11 webOS 스마트 화분 프로젝트 기반 3개월 경험 근거 초안
+- `PREPLANNING.md`에 2024-06-02~09-24 공개 GitHub 기록과 반복 통합 사례를 근거로 3개월 경험 Gate 정리
 - 좁혀진 ICP / JTBD와 반증 가능한 제품 가설
 - Pain 조사 Google Form / 응답 Sheet
 - 수동 DeviceSpec vs 자연어 초안 비교 활동지
@@ -119,7 +119,7 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 
 아직 필요한 증거:
 
-- 3개월 경험 Gate를 뒷받침하는 **실제 코드/문서/commit 링크와 반복 사례 2~3개**
+- ~~3개월 경험 Gate 증빙~~ → **PASS: 실제 commit 링크와 반복 사례 정리 완료**
 - 최근 실제 장비 통합 Pain과 반복 사례
 - 자연어 방식의 총 작업시간 절감 여부
 - 두 실제 장비의 단독 smoke와 Serial 안정성
@@ -197,7 +197,7 @@ Same Operator / Same MCP / Same Adapter
 
 ## Immediate next steps
 
-1. `PREPLANNING.md`의 3개월 경험 근거에 **실제 코드/문서/commit 링크와 반복 사례 2~3개**를 보강한다.
+1. ~~3개월 경험 근거 보강~~ → **완료: `PREPLANNING.md`에 공개 GitHub commit과 반복 사례 정리**
 2. 9/17까지 개인 문제 후보 3개와 후보별 사용자/대안/평가 입력 10건을 준비한다.
 3. Candidate A가 최종 선택되면 9/23까지 API/output/Skill/MCP/관측 계약과 30건 평가셋을 freeze한다.
 4. 하드웨어 수령 후 각 장비를 Agent 없이 단독 bring-up한다.
@@ -212,4 +212,4 @@ Same Operator / Same MCP / Same Adapter
 
 ---
 
-**Current status:** `PROJECT2 PRE-PLANNING / DOMAIN EXPERIENCE = EVIDENCE TO LINK / PRODUCT = INVESTIGATE / TECHNICAL VALIDATION PROTOTYPE = PROCEED`
+**Current status:** `PROJECT2 PRE-PLANNING / DOMAIN EXPERIENCE = PASS / PRODUCT = INVESTIGATE / TECHNICAL VALIDATION PROTOTYPE = PROCEED`

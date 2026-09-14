@@ -23,7 +23,7 @@
 
 | 요구사항 | 상태 | 현재 근거 | 남은 일 |
 |---|---|---|---|
-| 팀원 중 해당 버티컬 도메인을 **3개월 이상 직접 경험**한 사람이 있어야 함 | `PARTIAL` | 직접 경험 도메인을 **Embedded/IoT Device Integration**으로 좁혔고, `PREPLANNING.md`에 2024.03~2024.11 webOS 스마트 화분 프로젝트의 장비 통합 경험을 기록함 | 실제 코드/문서/commit 링크와 대표 반복 사례 2~3개를 붙여 증빙 완료 |
+| 팀원 중 해당 버티컬 도메인을 **3개월 이상 직접 경험**한 사람이 있어야 함 | `PASS` | `dudgns128/webos-gardening`에서 김재훈(`nanocode00`)의 2024-06-02~09-24 직접 HW-SW 통합 기록 확인. I²C sensor/actuator contract, 실제 데이터 변환, service 연동, timing/API 수정 commit을 `PREPLANNING.md`에 링크함 | 최종 발표/README에서 동일 근거를 짧게 제시 |
 | 실제 사용자의 반복 업무를 해결하는 주제일 것 | `PARTIAL` | 직접 경험한 새 센서·액추에이터·장비의 HW-SW 통합 반복 업무로 문제 범위를 좁힘 | 스마트 화분 경험의 구체 사례와 현재 대안을 2~3개 사례로 보강 |
 | 사전기획에서 개인별 문제 후보 **3개** 준비 | `PARTIAL` | `PREPLANNING.md` Candidate A 작성, B/C 비어 있음 | Candidate B/C 작성 |
 | 후보별 사용자 상황·현재 대안·범위 정리 | `PARTIAL` | Candidate A와 `PROJECT_PROPOSAL.md`에 일부 존재 | B/C 포함 동일 기준으로 정리 |
@@ -32,7 +32,7 @@
 | 고객 여정 맵 / 단계별 pain point | `TODO` | 명시적 customer journey map 없음 | 최종 주제 확정 후 작성 |
 | 유사 제품/현재 대안 분석 | `PARTIAL` | 기존 script/SDK/manual spec/workflow/PLC 후보 비교가 있음 | 실제 사용 대안과 경쟁 제품을 확인해 확정 |
 
-**판정:** Candidate A의 3개월 기간 자체는 **Embedded/IoT Device Integration 경험으로 충족 가능**하다고 본다. 다만 평가자가 확인할 수 있도록 실제 코드/문서/commit 링크와 반복 사례를 붙이기 전까지는 `PARTIAL`로 유지한다. Factory Automation 실무 경험을 근거로 주장하지 않는다.
+**판정:** Candidate A의 **3개월 직접 경험 Gate는 PASS**로 본다. 공개 GitHub 기록만으로도 2024-06-02~09-24의 Embedded/IoT HW-SW 통합 작업이 확인된다. 과거 경험은 I²C 기반이며, 이번 MVP의 Serial Adapter는 검증용 구현 선택으로 구분한다. Factory Automation 실무 경험을 근거로 주장하지 않는다.
 
 ---
 

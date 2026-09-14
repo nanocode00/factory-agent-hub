@@ -12,7 +12,7 @@
 
 | 항목 | 기존 상태 | Project2 반영 |
 |---|---|---|
-| 버티컬 도메인 | 소규모 연구실/장비 통합을 ICP 후보로 둠 | 직접 경험 도메인을 **Embedded/IoT Device Integration**으로 좁힌다. Factory는 적용 시나리오이며 제조 현장 경험을 주장하지 않는다. 2024.03~2024.11 webOS 스마트 화분 프로젝트를 주 근거로 사용하고 산출물 링크를 보강한다. |
+| 버티컬 도메인 | 소규모 연구실/장비 통합을 ICP 후보로 둠 | 직접 경험 도메인을 **Embedded/IoT Device Integration**으로 좁힌다. Factory는 적용 시나리오이며 제조 현장 경험을 주장하지 않는다. 공개 저장소에서 `nanocode00`의 2024-06-02~09-24 HW-SW 통합 작업을 확인했다. |
 | 사용자 UI | CLI/파일만으로도 된다고 봄 | **Vercel / Next.js UI 필수**. 입력·결과·실패 안내를 실제 사용자가 볼 수 있어야 함 |
 | Agent API | 로컬 Agent 중심 | **Cloud Run / FastAPI**에 `GET /health`, `POST /api/agent` 제공 |
 | MCP | Raspberry Pi의 로컬 경계 중심 | 외부 제출용 **Streamable HTTP `/mcp`**를 제공. `/api/agent`와 역할을 섞지 않음 |
@@ -35,17 +35,18 @@ Project2의 첫 체크포인트는 기술이 아니라 다음 질문이다.
 
 ### 확정한 직접 경험 도메인
 
-**Embedded/IoT 프로토타이핑 환경에서 새 센서·액추에이터·Serial 장비를 기존 시스템에 연결하고, 데이터·명령·파라미터·상태 확인 규칙을 맞춰 통합하는 작업**
+**Embedded/IoT 프로토타이핑 환경에서 센서·액추에이터·외부 장비를 기존 시스템에 연결하고, 통신 규칙·데이터 형식·명령·파라미터·상태 확인 규칙을 맞춰 통합하는 작업**
 
 주 경험 근거는 다음과 같다.
 
 - 경험자: 김재훈
-- 경험 기간: **2024.03~2024.11, 약 8개월**
-- 대표 프로젝트: **webOS 스마트 화분**
-- 실제 구성: Raspberry Pi, 센서, 급수 액추에이터, UI/소프트웨어 연동
-- 반복 업무: 장비 연결, 센서 데이터 규격 정리, 제어 로직 작성, HW-SW 통합 및 테스트
-- 반복 문제: 값/단위/전송 규칙 차이, 제어 조건 조율, 실제 HW-SW 인터페이스 연동
-- 남은 증빙: 실제 코드/문서/commit 링크와 대표 반복 사례 2~3개 정리
+- 공개 기록으로 확인되는 직접 작업 기간: **2024-06-02~2024-09-24, 약 3개월 3주**
+- 대표 프로젝트: **webOS Smart Home Gardening** — https://github.com/dudgns128/webos-gardening
+- 실제 구성: Raspberry Pi 4 / webOS OSE, Arduino, DHT11, 조도·수위·토양수분 센서, NeoPixel, 물펌프
+- 반복 업무: I²C command/data contract 작성, raw sensor data 변환, actuator 제어 연결, 상위 service 통합, 실제 HW timing/API 디버깅
+- 과거 프로젝트 통신: **I²C**. Serial 통합 경험으로 과장하지 않는다.
+- 대표 commit: `a94a8fc` (I²C HW control), `00e4febe` (timing/parsing fix), `f2e890aa` (dummy→real HW), `ea08aa6a` (HW integration complete)
+- 이번 MVP의 **text Serial Adapter는 과거 경험 그 자체가 아니라, 같은 Device Integration 문제를 다른 물리 인터페이스에서 검증하기 위한 구현 선택**이다.
 
 `Factory`는 이 직접 경험을 과장하는 표현으로 사용하지 않는다. Conveyor와 Robot Arm은 **이미 경험한 Device Integration 문제를 재현·검증하는 physical testbed**로 둔다. 제조 공장 운영, PLC/SCADA 통합, 산업용 로봇 운영 경험은 본 프로젝트의 직접 경험 근거로 주장하지 않는다.
 
@@ -53,7 +54,7 @@ Project2의 첫 체크포인트는 기술이 아니라 다음 질문이다.
 
 현재 가설을 Project2 형식으로 줄이면 다음과 같다.
 
-> **새 센서·액추에이터·Serial 장비를 프로토타입 시스템에 반복적으로 연결하는 개발자가, 장비마다 연결 방식·데이터·명령·파라미터·상태 확인 규칙을 다시 코드에 옮기고 통합해야 하는 반복 작업을 줄이기 위해, 자연어 장비 설명을 검증 가능한 DeviceSpec으로 만들고 승인된 기능만 기존 Agent가 재사용하도록 한다.**
+> **새 센서·액추에이터·외부 장비를 프로토타입 시스템에 반복적으로 연결하는 개발자가, 장비마다 통신 방식·데이터·명령·파라미터·상태 확인 규칙을 다시 코드에 옮기고 통합해야 하는 반복 작업을 줄이기 위해, 자연어 장비 설명을 검증 가능한 DeviceSpec으로 만들고 승인된 기능만 기존 Agent가 재사용하도록 한다. 이번 MVP는 그 검증 범위를 문서화된 text Serial 장비로 제한한다.**
 
 아직 Pain과 순절감은 검증 전이므로 제품 효과를 확정적으로 표현하지 않는다.
 
@@ -361,7 +362,7 @@ README.md
 
 ## 13. 지금 당장 필요한 결정
 
-1. **이 도메인을 3개월 이상 직접 경험했다고 설명할 팀원이 누구인지** 확인
+1. ~~이 도메인의 3개월 이상 직접 경험자 확인~~ → **완료: 김재훈(`nanocode00`), 공개 GitHub 기록 2024-06-02~09-24**
 2. 9/17 제출용 개인 후보 3개를 준비
 3. 이 아이디어를 유지한다면 사용자 문장을 `factory operator`가 아니라 실제 경험이 있는 **device integration / prototyping workflow**에 맞춰 좁힘
 4. 9/23 전에 평가셋 30건을 먼저 확정
