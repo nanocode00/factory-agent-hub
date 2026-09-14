@@ -97,7 +97,7 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 
 현재 장바구니 기준 구매 예정 총액은 약 **70,630원**이며 실제 결제 시 가격·배송비는 달라질 수 있다.
 
-> 제품 가설·범위·Build Gate·Project2 정렬은 `PROJECT_PLAN.md`를 따르고, **현재 하드웨어의 source of truth는 `HARDWARE_SPEC.md`와 `HARDWARE_BOM.md`**다.
+> 제품 가설·범위·Build Gate·Project2 정렬은 `PROJECT_PLAN.md`를 따르고, **현재 하드웨어의 source of truth는 `hardware/HARDWARE_SPEC.md`와 `hardware/HARDWARE_BOM.md`**다.
 
 ## Validation status
 
@@ -184,9 +184,9 @@ Same Operator / Same MCP / Same Adapter
 | [`REQUIREMENTS_CHECKLIST.md`](./REQUIREMENTS_CHECKLIST.md) | **Project2 요구사항 충족 상태 체크리스트** |
 | [`PROJECT_PLAN.md`](./PROJECT_PLAN.md) | **프로젝트 기획, 직접 경험 근거, ICP/JTBD, 범위, 아키텍처, 안전 경계, 평가 계획 source of truth** |
 | [`reviews/proposal-review.md`](./reviews/proposal-review.md) | 독립 기획 리뷰 snapshot과 `INVESTIGATE` 판정 |
-| [`HARDWARE_SPEC.md`](./HARDWARE_SPEC.md) | **현재 하드웨어 source of truth** |
-| [`HARDWARE_BOM.md`](./HARDWARE_BOM.md) | 구매품 / 보유품 / 조건부 BOM / 현재 비용 |
-| [`HARDWARE_PACKING_LIST.md`](./HARDWARE_PACKING_LIST.md) | 집에서 작업 장소로 가져갈 실제 부품 체크리스트 |
+| [`hardware/HARDWARE_SPEC.md`](./hardware/HARDWARE_SPEC.md) | **현재 하드웨어 source of truth** |
+| [`hardware/HARDWARE_BOM.md`](./hardware/HARDWARE_BOM.md) | 구매품 / 보유품 / 조건부 BOM / 현재 비용 |
+| [`hardware/HARDWARE_PACKING_LIST.md`](./hardware/HARDWARE_PACKING_LIST.md) | 집에서 작업 장소로 가져갈 실제 부품 체크리스트 |
 | [`IMPLEMENTATION_PLAN.md`](./IMPLEMENTATION_PLAN.md) | 하드웨어/Edge 중심 상세 WBS |
 | [`knowledge/agent-engineering.md`](./knowledge/agent-engineering.md) | Agent / MCP / validation / retry / Langfuse 구현 지식 |
 | [`knowledge/planning-review.md`](./knowledge/planning-review.md) | ICP / JTBD / evidence / Build Gate 기획 기준 |

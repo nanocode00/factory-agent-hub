@@ -20,12 +20,12 @@
 
 ### 현재 하드웨어 / 실행 source of truth
 
-- `HARDWARE_SPEC.md`
+- `hardware/HARDWARE_SPEC.md`
   - 현재 테스트베드의 기구, controller, power, sensor, protocol 초안과 Hardware Gate를 정의한다.
   - 하드웨어 후보가 `PROJECT_PLAN.md`의 과거 검토 내용과 다르면 **이 문서를 우선**한다.
-- `HARDWARE_BOM.md`
+- `hardware/HARDWARE_BOM.md`
   - 실제 구매품, 보유품, 조건부 BOM, 가격과 구매 상태를 정의한다.
-- `HARDWARE_PACKING_LIST.md`
+- `hardware/HARDWARE_PACKING_LIST.md`
   - 보유 부품 중 실제 작업 장소로 가져갈 수량과 spare/fallback을 정의한다.
 - `IMPLEMENTATION_PLAN.md`
   - 위 최신 하드웨어를 전제로 한 2주 실행 순서, Gate, freeze, demo 계획을 정의한다.
@@ -166,7 +166,7 @@ GO | INVESTIGATE | HOLD
 
 1. 사용자의 현재 명시적 요청
 2. `PROJECT_PLAN.md`의 제품 목표 / Build Gate
-3. `HARDWARE_SPEC.md` / `HARDWARE_BOM.md` / `IMPLEMENTATION_PLAN.md`의 최신 구현 결정
+3. `hardware/HARDWARE_SPEC.md` / `hardware/HARDWARE_BOM.md` / `IMPLEMENTATION_PLAN.md`의 최신 구현 결정
 4. 승인된 최신 review/decision 문서가 있다면 그 결정
 5. `knowledge/agent-engineering.md`
 

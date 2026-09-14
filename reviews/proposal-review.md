@@ -1,6 +1,6 @@
 # Proposal Review
 
-> **Historical review snapshot:** 이 문서는 당시 `PROJECT_PROPOSAL.md`를 기준으로 수행한 독립 리뷰 기록이다. 이후 Proposal과 하드웨어 계획이 갱신되었으므로, 현재 상태와 실행 기준은 루트 `README.md`, `PROJECT_PROPOSAL.md`, `HARDWARE_SPEC.md`를 따른다.
+> **Historical review snapshot:** 이 문서는 당시 `PROJECT_PROPOSAL.md`를 기준으로 수행한 독립 리뷰 기록이다. 이후 Proposal과 하드웨어 계획이 갱신되었으므로, 현재 상태와 실행 기준은 루트 `README.md`, `PROJECT_PROPOSAL.md`, `hardware/HARDWARE_SPEC.md`를 따른다.
 
 ## Verdict
 

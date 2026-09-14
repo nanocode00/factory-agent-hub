@@ -2,7 +2,7 @@
 
 > AI Human 7th Project2 기준으로 정리한 현재 프로젝트의 **기획·범위·아키텍처·검증 계획 source of truth**다.
 >
-> 공식 요구사항 원문은 `requirements/`, 요구사항 충족 상태는 `REQUIREMENTS_CHECKLIST.md`, 구현 세부 WBS는 `IMPLEMENTATION_PLAN.md`, 하드웨어 상세는 `HARDWARE_*.md`를 따른다.
+> 공식 요구사항 원문은 `requirements/`, 요구사항 충족 상태는 `REQUIREMENTS_CHECKLIST.md`, 구현 세부 WBS는 `IMPLEMENTATION_PLAN.md`, 하드웨어 상세는 `hardware/HARDWARE_*.md`를 따른다.
 
 ## 1. 현재 결론
 
@@ -330,7 +330,7 @@ invoke_capability(device_id, capability_id, arguments, approval_token)
 | Object sensor | IR proximity sensor |
 | Local stop | `MSL-1C2P(중)-4mm` slide switch ×2 |
 
-하드웨어 상세와 구매/포장 정보는 `HARDWARE_SPEC.md`, `HARDWARE_BOM.md`, `HARDWARE_PACKING_LIST.md`를 따른다.
+하드웨어 상세와 구매/포장 정보는 `hardware/HARDWARE_SPEC.md`, `hardware/HARDWARE_BOM.md`, `hardware/HARDWARE_PACKING_LIST.md`를 따른다.
 
 ## 10. 평가 계획
 
@@ -470,7 +470,7 @@ Langfuse:
 - `REQUIREMENTS_CHECKLIST.md` — 요구사항 충족 여부만 기록한다.
 - `PROJECT_PLAN.md` — 제품/프로젝트 기획과 현재 결정의 source of truth.
 - `IMPLEMENTATION_PLAN.md` — 구현 순서와 작업 WBS.
-- `HARDWARE_*.md` — 하드웨어 상세.
+- `hardware/HARDWARE_*.md` — 하드웨어 상세.
 - `skills/` — 도메인 Skill.
 - `knowledge/` — 참고 지식.
 - `reviews/` — 과거 검토와 기록.

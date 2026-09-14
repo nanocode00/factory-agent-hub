@@ -1,7 +1,7 @@
 # Factory Agent Hub — 2주 구현 계획안
 
 > 상태: **2026-09-13 실행안 v3 / local stop 구매안 반영**  
-> 전제: `HARDWARE_SPEC.md` v5와 `HARDWARE_BOM.md` v3의 **리브온 Conveyor + 이엘사이언스 Arduino 4-DOF Robot Arm + Raspberry Pi 3B+** 구성을 사용한다.
+> 전제: `hardware/HARDWARE_SPEC.md` v5와 `hardware/HARDWARE_BOM.md` v3의 **리브온 Conveyor + 이엘사이언스 Arduino 4-DOF Robot Arm + Raspberry Pi 3B+** 구성을 사용한다.
 >
 > 목표는 멋진 로봇을 만드는 것이 아니라 **서로 다른 실제 장비 2개를 고정된 Serial Adapter와 선언적 DeviceSpec으로 등록하고, 같은 MCP 경계에서 발견·승인·실행할 수 있음을 검증하는 것**이다.
 
@@ -44,7 +44,7 @@
 
 ### Hardware Purchase
 
-최종 구매안은 `HARDWARE_BOM.md`를 따른다.
+최종 구매안은 `hardware/HARDWARE_BOM.md`를 따른다.
 
 - [ ] 리브온 목재 Conveyor kit 주문
 - [ ] 이엘사이언스 Arduino 집게 로봇팔 4관절 주문
@@ -56,7 +56,7 @@
 
 ### Inventory Check
 
-집에서 가져갈 세부 수량은 `HARDWARE_PACKING_LIST.md`를 따른다.
+집에서 가져갈 세부 수량은 `hardware/HARDWARE_PACKING_LIST.md`를 따른다.
 
 - [ ] Raspberry Pi 3B+ / 기존 전원 / microSD / network 준비
 - [ ] Arduino Uno 3대 선별 — 장비 2대 + spare 1대
@@ -510,7 +510,7 @@ no-code onboarding evidence
 ## 15. 다음 즉시 행동
 
 1. 최종 구매안 결제
-2. `HARDWARE_PACKING_LIST.md` 기준 집에서 가져갈 부품 선별
+2. `hardware/HARDWARE_PACKING_LIST.md` 기준 집에서 가져갈 부품 선별
 3. 팀원별 역할 확정
 4. repo에 firmware / edge / agent 작업 skeleton 생성
 5. hardware 도착 전 Serial protocol과 DeviceSpec schema 초안 작성
