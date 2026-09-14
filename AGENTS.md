@@ -13,7 +13,7 @@
 
 ### 제품 기획 원본
 
-- `PROJECT_PROPOSAL.md`
+- `PROJECT_PLAN.md`
   - 현재 프로젝트의 제품 목표, 사용자, MVP, Build Gate, 안전 경계를 정의한다.
   - 사용자가 명시적으로 수정하라고 요청하기 전에는 임의로 제품 방향을 변경하지 않는다.
   - 과거 하드웨어 후보 이름이 남아 있더라도 **현재 구매/구현 하드웨어를 결정하는 문서로 사용하지 않는다.**
@@ -22,7 +22,7 @@
 
 - `HARDWARE_SPEC.md`
   - 현재 테스트베드의 기구, controller, power, sensor, protocol 초안과 Hardware Gate를 정의한다.
-  - 하드웨어 후보가 `PROJECT_PROPOSAL.md`의 과거 검토 내용과 다르면 **이 문서를 우선**한다.
+  - 하드웨어 후보가 `PROJECT_PLAN.md`의 과거 검토 내용과 다르면 **이 문서를 우선**한다.
 - `HARDWARE_BOM.md`
   - 실제 구매품, 보유품, 조건부 BOM, 가격과 구매 상태를 정의한다.
 - `HARDWARE_PACKING_LIST.md`
@@ -51,7 +51,7 @@
 
 ## 목적
 
-`PROJECT_PROPOSAL.md`가 **만들 수 있는지(HOW)**보다 먼저 **만들 가치가 있는지(WHETHER)**를 검토한다.
+`PROJECT_PLAN.md`가 **만들 수 있는지(HOW)**보다 먼저 **만들 가치가 있는지(WHETHER)**를 검토한다.
 
 ## 필수 검토 항목
 
@@ -92,7 +92,7 @@
 - 사용자가 요청하지 않은 코드 구현 금지
 - 구현이 재미있다는 이유로 GO 판정 금지
 - 증거가 없는 고객 문제를 사실로 보강하지 말 것
-- `PROJECT_PROPOSAL.md`를 자동으로 고치지 말 것
+- `PROJECT_PLAN.md`를 자동으로 고치지 말 것
 - 기술 스택부터 정한 뒤 문제를 거기에 맞추지 말 것
 - 모든 기능을 유지한 채 일정만 낙관적으로 잡지 말 것
 
@@ -165,7 +165,7 @@ GO | INVESTIGATE | HOLD
 ## 입력 우선순위
 
 1. 사용자의 현재 명시적 요청
-2. `PROJECT_PROPOSAL.md`의 제품 목표 / Build Gate
+2. `PROJECT_PLAN.md`의 제품 목표 / Build Gate
 3. `HARDWARE_SPEC.md` / `HARDWARE_BOM.md` / `IMPLEMENTATION_PLAN.md`의 최신 구현 결정
 4. 승인된 최신 review/decision 문서가 있다면 그 결정
 5. `knowledge/agent-engineering.md`
@@ -299,7 +299,7 @@ Implementer
 
 # 6. Factory Agent Hub 현재 핵심 가설
 
-이 항목은 `PROJECT_PROPOSAL.md`의 방향을 빠르게 이해하기 위한 요약이며, 기획서 자체를 대체하지 않는다.
+이 항목은 `PROJECT_PLAN.md`의 방향을 빠르게 이해하기 위한 요약이며, 기획서 자체를 대체하지 않는다.
 
 현재 검증하려는 핵심 아이디어는 다음과 같다.
 

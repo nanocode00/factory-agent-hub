@@ -6,7 +6,7 @@
 
 > **3개월 경험 Gate: PASS.** 직접 경험 도메인은 **Embedded/IoT Device Integration**이다. `dudgns128/webos-gardening` 공개 기록에서 김재훈(`nanocode00`)의 2024-06-02~09-24 I²C 기반 센서·액추에이터 HW-SW 통합 작업을 확인했다. Factory는 적용 시나리오이며 제조 현장 경험을 주장하지 않는다. 이번 MVP의 text Serial Adapter는 동일한 Device Integration 문제를 검증하기 위한 구현 선택이다.
 
-자세한 정렬 기준은 [`PROJECT2_ALIGNMENT.md`](./PROJECT2_ALIGNMENT.md), 9/14~17 사전기획은 [`PREPLANNING.md`](./PREPLANNING.md)를 따른다.
+현재 프로젝트의 기획·범위·경험 근거·Project2 정렬 기준은 [`PROJECT_PLAN.md`](./PROJECT_PLAN.md)를 source of truth로 사용한다.
 
 ## What this project is testing
 
@@ -97,7 +97,7 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 
 현재 장바구니 기준 구매 예정 총액은 약 **70,630원**이며 실제 결제 시 가격·배송비는 달라질 수 있다.
 
-> 제품 가설·Build Gate·prototype 진행 상태는 `PROJECT_PROPOSAL.md`를 따르고, **현재 하드웨어의 source of truth는 `HARDWARE_SPEC.md`와 `HARDWARE_BOM.md`**다.
+> 제품 가설·범위·Build Gate·Project2 정렬은 `PROJECT_PLAN.md`를 따르고, **현재 하드웨어의 source of truth는 `HARDWARE_SPEC.md`와 `HARDWARE_BOM.md`**다.
 
 ## Validation status
 
@@ -106,7 +106,7 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 문서로 준비된 것:
 
 - Embedded/IoT Device Integration으로 좁힌 직접 경험 도메인 정의
-- `PREPLANNING.md`에 2024-06-02~09-24 공개 GitHub 기록과 반복 통합 사례를 근거로 3개월 경험 Gate 정리
+- `PROJECT_PLAN.md`에 2024-06-02~09-24 공개 GitHub 기록과 반복 통합 사례를 근거로 3개월 경험 Gate 정리
 - 좁혀진 ICP / JTBD와 반증 가능한 제품 가설
 - Pain 조사 Google Form / 응답 Sheet
 - 수동 DeviceSpec vs 자연어 초안 비교 활동지
@@ -182,9 +182,7 @@ Same Operator / Same MCP / Same Adapter
 | 문서 | 역할 |
 |---|---|
 | [`REQUIREMENTS_CHECKLIST.md`](./REQUIREMENTS_CHECKLIST.md) | **Project2 요구사항 충족 상태 체크리스트** |
-| [`PROJECT2_ALIGNMENT.md`](./PROJECT2_ALIGNMENT.md) | **Project2 필수 조건, 배포 구조, 일정, Evals 정렬 source of truth** |
-| [`PREPLANNING.md`](./PREPLANNING.md) | **9/14~17 개인 사전기획: 후보 3개 / 경험 Gate / 평가 입력 후보** |
-| [`PROJECT_PROPOSAL.md`](./PROJECT_PROPOSAL.md) | 제품 가설, ICP/JTBD, Build Gate, prototype 진행 상태, MVP, 안전 경계 |
+| [`PROJECT_PLAN.md`](./PROJECT_PLAN.md) | **프로젝트 기획, 직접 경험 근거, ICP/JTBD, 범위, 아키텍처, 안전 경계, 평가 계획 source of truth** |
 | [`reviews/proposal-review.md`](./reviews/proposal-review.md) | 독립 기획 리뷰 snapshot과 `INVESTIGATE` 판정 |
 | [`HARDWARE_SPEC.md`](./HARDWARE_SPEC.md) | **현재 하드웨어 source of truth** |
 | [`HARDWARE_BOM.md`](./HARDWARE_BOM.md) | 구매품 / 보유품 / 조건부 BOM / 현재 비용 |
@@ -197,7 +195,7 @@ Same Operator / Same MCP / Same Adapter
 
 ## Immediate next steps
 
-1. ~~3개월 경험 근거 보강~~ → **완료: `PREPLANNING.md`에 공개 GitHub commit과 반복 사례 정리**
+1. ~~기획 문서와 3개월 경험 근거 정리~~ → **완료: `PROJECT_PLAN.md`로 통합**
 2. 9/17까지 개인 문제 후보 3개와 후보별 사용자/대안/평가 입력 10건을 준비한다.
 3. Candidate A가 최종 선택되면 9/23까지 API/output/Skill/MCP/관측 계약과 30건 평가셋을 freeze한다.
 4. 하드웨어 수령 후 각 장비를 Agent 없이 단독 bring-up한다.

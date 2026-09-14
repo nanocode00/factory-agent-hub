@@ -16,6 +16,7 @@
 - `TODO` — 아직 산출물이 없음
 - `BLOCKED` — 외부 결정이나 사람의 실제 경험 증거가 먼저 필요함
 - `LATER` — 마감 전 필요하지만 현재 단계에서는 아직 수행 시점이 아님
+- `DEFERRED` — 요구사항 자체는 남아 있지만 현재 프로젝트 정리 단계에서 의도적으로 보류함
 
 ---
 
@@ -23,11 +24,11 @@
 
 | 요구사항 | 상태 | 현재 근거 | 남은 일 |
 |---|---|---|---|
-| 팀원 중 해당 버티컬 도메인을 **3개월 이상 직접 경험**한 사람이 있어야 함 | `PASS` | `dudgns128/webos-gardening`에서 김재훈(`nanocode00`)의 2024-06-02~09-24 직접 HW-SW 통합 기록 확인. I²C sensor/actuator contract, 실제 데이터 변환, service 연동, timing/API 수정 commit을 `PREPLANNING.md`에 링크함 | 최종 발표/README에서 동일 근거를 짧게 제시 |
+| 팀원 중 해당 버티컬 도메인을 **3개월 이상 직접 경험**한 사람이 있어야 함 | `PASS` | `dudgns128/webos-gardening`에서 김재훈(`nanocode00`)의 2024-06-02~09-24 직접 HW-SW 통합 기록 확인. I²C sensor/actuator contract, 실제 데이터 변환, service 연동, timing/API 수정 commit을 `PROJECT_PLAN.md`에 링크함 | 최종 발표/README에서 동일 근거를 짧게 제시 |
 | 실제 사용자의 반복 업무를 해결하는 주제일 것 | `PARTIAL` | 직접 경험한 새 센서·액추에이터·장비의 HW-SW 통합 반복 업무로 문제 범위를 좁힘 | 스마트 화분 경험의 구체 사례와 현재 대안을 2~3개 사례로 보강 |
-| 사전기획에서 개인별 문제 후보 **3개** 준비 | `PARTIAL` | `PREPLANNING.md` Candidate A 작성, B/C 비어 있음 | Candidate B/C 작성 |
-| 후보별 사용자 상황·현재 대안·범위 정리 | `PARTIAL` | Candidate A와 `PROJECT_PROPOSAL.md`에 일부 존재 | B/C 포함 동일 기준으로 정리 |
-| 9/17까지 평가셋 후보 **10건** 준비 | `PASS` for A | `PREPLANNING.md` Candidate A에 10건 존재 | 최종 주제가 A가 아닐 경우 새 후보로 다시 작성 |
+| 사전기획에서 개인별 문제 후보 **3개** 준비 | `DEFERRED` | Factory Agent Hub 단일 주제를 기준으로 기획을 정리하기로 함. 형식만 채우기 위한 B/C는 만들지 않음 | 교육과정에서 3개 후보 제출을 실제 검수할 경우에만 별도로 보완 |
+| 후보별 사용자 상황·현재 대안·범위 정리 | `PASS` for selected topic | `PROJECT_PLAN.md`에 선택 주제의 사용자, JTBD, 현재 대안/가설, 범위와 제외 범위를 통합 | B/C 후보는 현재 작성하지 않음 |
+| 9/17까지 평가셋 후보 **10건** 준비 | `PASS` | `PROJECT_PLAN.md`에 선택 주제 대표 평가 케이스 10건과 30건 분포가 존재 | 9/23까지 실제 Dataset 30건으로 구체화 |
 | 디자인 씽킹 기반 문제 정의 | `PARTIAL` | ICP/JTBD, 치명적 가정, 대안 비교가 존재 | 사용자 경험 근거를 반영한 최종 문제 정의 문장 확정 |
 | 고객 여정 맵 / 단계별 pain point | `TODO` | 명시적 customer journey map 없음 | 최종 주제 확정 후 작성 |
 | 유사 제품/현재 대안 분석 | `PARTIAL` | 기존 script/SDK/manual spec/workflow/PLC 후보 비교가 있음 | 실제 사용 대안과 경쟁 제품을 확인해 확정 |
@@ -60,7 +61,7 @@
 | 세부 요구 | 상태 | 현재 |
 |---|---|---|
 | LLM API가 핵심 로직에 사용됨 | `PARTIAL` | Setup/Operator Agent 설계만 존재 |
-| Pydantic 응답 스키마 | `PARTIAL` | `PROJECT2_ALIGNMENT.md`에 계약 초안만 존재, 코드 없음 |
+| Pydantic 응답 스키마 | `PARTIAL` | `PROJECT_PLAN.md`에 계약 초안만 존재, 코드 없음 |
 | 검증 로직 | `PARTIAL` | DeviceSpec/validator 설계는 있으나 코드 없음 |
 | 재시도 전략 | `PARTIAL` | Skill에 structured output repair 최대 1회 규칙 존재, 코드 없음 |
 | 최종 실패/폴백/사용자 안내 | `PARTIAL` | 실패 원칙은 문서화, 실제 API 동작 없음 |
@@ -513,7 +514,7 @@ PDF는 README 상단에 특히 다음 세 가지를 요구한다.
 
 # 14. 문서 통합은 요구사항 정렬 후
 
-현재는 `PROJECT_PROPOSAL.md`, `PROJECT2_ALIGNMENT.md`, `PREPLANNING.md`, `IMPLEMENTATION_PLAN.md`, `HARDWARE_*` 등이 일부 중복된다.
+현재는 `PROJECT_PLAN.md`, `PROJECT_PLAN.md`, `PROJECT_PLAN.md`, `IMPLEMENTATION_PLAN.md`, `HARDWARE_*` 등이 일부 중복된다.
 
 하지만 **지금은 합치지 않는다.**
 
