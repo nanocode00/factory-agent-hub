@@ -1,10 +1,10 @@
 # Factory Agent Hub
 
-> **자연어로 설명한 새 설비를 검증 가능한 DeviceSpec / Capability Spec으로 변환하고, 사람 검토·실장비 테스트 후 Registry에 등록하여 기존 장비와 함께 발견·실행하는 Vertical Agent 실험 프로젝트**
+> **새 센서·액추에이터·Serial 장비를 프로토타입 시스템에 연결할 때 반복되는 인터페이스 통합 작업을, 검증 가능한 DeviceSpec / Capability Spec과 Agent + MCP 흐름으로 구조화하는 Vertical Agent 실험 프로젝트**
 
 현재 단계는 **AI Human 7th Project2 사전기획(2026-09-14~09-17) + 하드웨어 검증 준비**다. 기존 기술 가설과 테스트베드는 유지하지만, 새로 공개된 Project2 기준에 맞춰 **Vercel UI, Cloud Run/FastAPI, LLM output contract, Skill, Streamable HTTP MCP, Docker, Langfuse 3축, 30+ Evals**를 필수 범위로 반영했다.
 
-> **중요 Gate:** Project2는 팀원이 해당 사용자·업무 흐름·예외 상황을 **3개월 이상 직접 경험한 버티컬 도메인**이어야 한다. 이 조건을 구체적인 경험과 산출물로 증명하지 못하면 Factory Agent Hub를 최종 주제로 확정하지 않는다.
+> **도메인 정의:** Project2의 3개월 직접 경험 기준은 `Factory Automation` 실무 경험으로 주장하지 않는다. 직접 경험 도메인은 **Embedded/IoT Device Integration**이며, 2024.03~2024.11 webOS 스마트 화분 프로젝트에서 Raspberry Pi·센서·급수 액추에이터·UI를 통합한 경험을 주 근거로 사용한다. Conveyor/Robot Arm은 이 문제를 검증하는 physical testbed다. 구체 사례와 산출물 링크는 사전기획 단계에서 보강한다.
 
 자세한 정렬 기준은 [`PROJECT2_ALIGNMENT.md`](./PROJECT2_ALIGNMENT.md), 9/14~17 사전기획은 [`PREPLANNING.md`](./PREPLANNING.md)를 따른다.
 
@@ -72,7 +72,7 @@ Cloud Run은 USB Serial에 직접 접근할 수 없으므로 physical device exe
 | Cloud Run / FastAPI | Agent 실행 + output contract + validation/retry | Cloud Run URL + `GET /health` + `POST /api/agent` |
 | MCP Server | 도메인 데이터/행동 tool 제공 | `/mcp` 연결 방법 + tool 목록 + 실제 호출 결과 |
 | Docker | 재현 가능한 실행 | Dockerfile + `docker compose up` |
-| Skill | 도메인 규칙·판단·예외 처리 | `SKILL.md` |
+| Skill | 도메인 규칙·판단·예외 처리 | `skills/factory-device-integration/SKILL.md` |
 | Langfuse | trace → prompt version → 같은 eval 재측정 | trace + prompt v1/v2 + `EVAL_REPORT.md` |
 | Evals | 30건 이상 회귀 측정 | Dataset + rubric + 변경 전후 score |
 | Repo hygiene | 재현/보안 | `.env.example`, secret 미커밋, README |
@@ -105,6 +105,8 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 
 문서로 준비된 것:
 
+- Embedded/IoT Device Integration으로 좁힌 직접 경험 도메인 정의
+- 2024.03~2024.11 webOS 스마트 화분 프로젝트 기반 3개월 경험 근거 초안
 - 좁혀진 ICP / JTBD와 반증 가능한 제품 가설
 - Pain 조사 Google Form / 응답 Sheet
 - 수동 DeviceSpec vs 자연어 초안 비교 활동지
@@ -117,7 +119,7 @@ local stop은 저전압 **logic input**으로 사용한다. 모터/servo 전원�
 
 아직 필요한 증거:
 
-- **3개월 이상 도메인 직접 경험 Gate**
+- 3개월 경험 Gate를 뒷받침하는 **실제 코드/문서/commit 링크와 반복 사례 2~3개**
 - 최근 실제 장비 통합 Pain과 반복 사례
 - 자연어 방식의 총 작업시간 절감 여부
 - 두 실제 장비의 단독 smoke와 Serial 안정성
@@ -179,6 +181,7 @@ Same Operator / Same MCP / Same Adapter
 
 | 문서 | 역할 |
 |---|---|
+| [`REQUIREMENTS_CHECKLIST.md`](./REQUIREMENTS_CHECKLIST.md) | **Project2 요구사항 충족 상태 체크리스트** |
 | [`PROJECT2_ALIGNMENT.md`](./PROJECT2_ALIGNMENT.md) | **Project2 필수 조건, 배포 구조, 일정, Evals 정렬 source of truth** |
 | [`PREPLANNING.md`](./PREPLANNING.md) | **9/14~17 개인 사전기획: 후보 3개 / 경험 Gate / 평가 입력 후보** |
 | [`PROJECT_PROPOSAL.md`](./PROJECT_PROPOSAL.md) | 제품 가설, ICP/JTBD, Build Gate, prototype 진행 상태, MVP, 안전 경계 |
@@ -194,9 +197,9 @@ Same Operator / Same MCP / Same Adapter
 
 ## Immediate next steps
 
-1. `PREPLANNING.md`의 **3개월 경험 Gate**를 먼저 채운다.
+1. `PREPLANNING.md`의 3개월 경험 근거에 **실제 코드/문서/commit 링크와 반복 사례 2~3개**를 보강한다.
 2. 9/17까지 개인 문제 후보 3개와 후보별 사용자/대안/평가 입력 10건을 준비한다.
-3. 이 아이디어가 Gate를 통과하면 9/23까지 API/output/Skill/MCP/관측 계약과 30건 평가셋을 freeze한다.
+3. Candidate A가 최종 선택되면 9/23까지 API/output/Skill/MCP/관측 계약과 30건 평가셋을 freeze한다.
 4. 하드웨어 수령 후 각 장비를 Agent 없이 단독 bring-up한다.
 5. 동시에 Vercel / FastAPI / Docker / Langfuse skeleton을 만든다.
 6. Cloud Run ↔ Raspberry Pi edge 연결을 작은 smoke로 먼저 검증한다.
@@ -209,4 +212,4 @@ Same Operator / Same MCP / Same Adapter
 
 ---
 
-**Current status:** `PROJECT2 PRE-PLANNING / PRODUCT = INVESTIGATE / TECHNICAL VALIDATION PROTOTYPE = PROCEED`
+**Current status:** `PROJECT2 PRE-PLANNING / DOMAIN EXPERIENCE = EVIDENCE TO LINK / PRODUCT = INVESTIGATE / TECHNICAL VALIDATION PROTOTYPE = PROCEED`
