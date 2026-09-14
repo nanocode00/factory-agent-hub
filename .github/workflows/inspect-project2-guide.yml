@@ -1,0 +1,20 @@
+name: Inspect Project2 guide
+
+on:
+  push:
+    paths:
+      - '.github/workflows/inspect-project2-guide.yml'
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract PDF text
+        run: |
+          set -euo pipefail
+          echo '=== PDF INFO ==='
+          pdfinfo requirements/project2-guide-v3.pdf || true
+          echo '=== PDF TEXT START ==='
+          pdftotext -layout requirements/project2-guide-v3.pdf -
+          echo '=== PDF TEXT END ==='
