@@ -33,6 +33,13 @@ replace_once(
     "> 제품 가설·범위·Build Gate·Project2 정렬은 `PROJECT_PLAN.md`를 따르고, **현재 하드웨어의 source of truth는 `HARDWARE_SPEC.md`와 `HARDWARE_BOM.md`**다.",
 )
 
+p = Path("README.md")
+s = p.read_text(encoding="utf-8")
+s = s.replace("`PREPLANNING.md`", "`PROJECT_PLAN.md`")
+s = s.replace("`PROJECT2_ALIGNMENT.md`", "`PROJECT_PLAN.md`")
+s = s.replace("`PROJECT_PROPOSAL.md`", "`PROJECT_PLAN.md`")
+p.write_text(s, encoding="utf-8")
+
 p = Path("REQUIREMENTS_CHECKLIST.md")
 s = p.read_text(encoding="utf-8")
 s = s.replace(
