@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install PDF tools
+        run: sudo apt-get update -qq && sudo apt-get install -y poppler-utils
       - name: Extract PDF text
         run: |
           set -euo pipefail
           echo '=== PDF INFO ==='
-          pdfinfo requirements/project2-guide-v3.pdf || true
+          pdfinfo requirements/project2-guide-v3.pdf
           echo '=== PDF TEXT START ==='
           pdftotext -layout requirements/project2-guide-v3.pdf -
           echo '=== PDF TEXT END ==='
